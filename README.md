@@ -35,9 +35,9 @@
 
 ### module/fd_model (refactored)
 Содержит функции для работы с flow diagram (системная динамика)
-### fd_model.py - основные компоненты модели
-### vensim_fd_converter.py - модели, созданные в программе vensim преобразовываются во внутренние компоненты (fd_model.py)
-### fd_model.py - преобразование модели в rnn (prn)
+#### fd_model.py - основные компоненты модели
+#### vensim_fd_converter.py - модели, созданные в программе vensim преобразовываются во внутренние компоненты (fd_model.py)
+#### fd_model.py - преобразование модели в rnn (prn)
 
 ### module/print_results/stats.py (not refactored)
 Содержит функции генерирования графиков для статьи
