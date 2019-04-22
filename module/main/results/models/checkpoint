@@ -1,0 +1,6 @@
+model_checkpoint_path: "new_nearest6_378"
+all_model_checkpoint_paths: "new_nearest6_354"
+all_model_checkpoint_paths: "new_nearest6_360"
+all_model_checkpoint_paths: "new_nearest6_366"
+all_model_checkpoint_paths: "new_nearest6_372"
+all_model_checkpoint_paths: "new_nearest6_378"

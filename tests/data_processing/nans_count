@@ -1,0 +1,62 @@
+patient_id                                             0
+epizod_id                                              0
+start_date                                             0
+end_date                                               0
+cod1                                                   0
+cod2                                                   0
+event_date                                             0
+result                                                 0
+Troponin                                           74560
+RBC                                                42091
+WBC                                                42803
+HGB                                                42096
+HCT                                                43748
+PLT                                                42205
+AST                                                74484
+ALT                                                58148
+Kreatinin                                          96023
+Glucose                                            93857
+Holesterin                                         95784
+pacient_id -                                           0
+epizod_id -                                            0
+age                                                    0
+durationcalc                                           0
+MIN_HGB                                                0
+MAX_Troponin                                           0
+MAX_ALT                                                0
+MAX_ACT                                                0
+MAX_Creatinine                                         0
+MAX_Glucouse                                           0
+MAX_Leukocytes                                         0
+                                                   ...
+MakdPmax Аортальный клапан Pmax                    91434
+Meem Митральный  клапан E/ Em                      95159
+Mveva Митральный клапан Ve/Va                      91934
+mkVa митральный клапан Va                          91136
+mkVe митральный клапан  Ve                         90359
+Mtkvd  трикуспидальный  клапан dPmax               94800
+Mtkv трикуспидальный  клапан Vmax                  93137
+MpkVmax  пульмональный  клапан Vmax                91713
+Mpkd пульмональный  клапан Vmax                    92976
+Mcss частота СС                                    95774
+mkTdec                                             95123
+Mkin Кинетика                                      86719
+Mrit ритм                                          86719
+Mst состояние аорты                                86719
+MLpo МПП                                           86719
+Makstv Аортальный клапан створки                   86719
+Makregur Аортальный клапан регургитация            86719
+mkregur  митральный клапан  регургитация           86719
+mkstv митральный клапан створки                    86719
+Mtkregur трикуспидальный  клапан  регургитация     86719
+Mtkstv  трикуспидальный  клапан створки            86719
+Mpkreg пульмональный  клапан  регургитация         86719
+tmp_date                                           86719
+timedelta                                              0
+event_timedelta                                        0
+duration                                               0
+Bleeding                                               0
+Contrast-induced nephropathy                           0
+Stress-induced hyperglycemia                           0
+Systemic inflammatory response                         0
+Length: 110, dtype: int64

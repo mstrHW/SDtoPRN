@@ -1,0 +1,19 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Example user template template
+### Example user template
+
+# IntelliJ project files
+.idea/
+*.iml
+out
+gen
+__pycache__/
+
+# My files
+data/
+logs/
+tests/logs/
+vensim_models/
+conditions_map
+module/main/results/data_*
+
