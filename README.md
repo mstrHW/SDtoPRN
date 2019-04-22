@@ -1,5 +1,13 @@
 # SDtoRNN
 
+## main
+### module/main/all_process.py (not refactored)
+Процесс создания и настройки параметров модели sd для медицинских данных с различными режимами, а также построение графиков.
+### module/main/data_preprocessing.py (almost refactored)
+Процесс преобразования данных, включая очистку полей, соединение данных из разных файлов, обработка выбросов, заполнение пропусков, добавление периодичности и преобразование для rnn.
+### module/main/simple_fd's_to_rnn.py (almost refactored)
+Процесс создания и настройки параметров модели sd для данных простых моделей (teacup, predator-prey).
+
 ## Работа с данными
 
 ### module/almazov_dataset_processing/data_file_processing (refactored)
