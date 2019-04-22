@@ -1,6 +1,6 @@
 # SDtoRNN
 
-## module/almazov_dataset_processing/data_file_processing (refactored)
+### module/almazov_dataset_processing/data_file_processing (refactored)
 Содержит функции для работы с мед.данными центра Алмазова очистка данных, преобразование полей в вид, который может быть использован в моделях
 
 # module/almazov_dataset_processing/convert_to_periodic_data.py (refactored)
