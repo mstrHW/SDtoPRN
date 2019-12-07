@@ -1,9 +1,12 @@
 import numpy as np
 import tensorflow as tf
 from module.nn_model import NNModel
+from module.fd_model.fd_model import FD
 # from arch.NewRNN import NewRNN
 
 my_float = np.float64
+
+
 
 
 class FDRNNConverter(object):
@@ -12,14 +15,14 @@ class FDRNNConverter(object):
         self.phi_h = hidden_activation
         self.phi_o = output_activation
 
-    def fd_to_rnn(self, FD):
+    def fd_to_rnn(self, flow_diagram: FD):
 
-        self.FD = FD
+        self.flow_diagram = flow_diagram
 
-        levels_count = len(FD.levels)
-        constants_count = len(FD.constants)
+        levels_count = len(flow_diagram.levels)
+        constants_count = len(flow_diagram.constants)
         # rates_count = len(FD.rates) * 100
-        rates_count = len(FD.rates)
+        rates_count = len(flow_diagram.rates)
         units_count = levels_count + constants_count
         # hidden_count = units_count * 30
         hidden_count = rates_count
@@ -49,20 +52,20 @@ class FDRNNConverter(object):
         W_ry_shape = [rates_count, units_count]
         W_ry = np.zeros(shape=W_ry_shape, dtype=my_float)
 
-        for rate in FD.rates:
+        for rate in flow_diagram.rates:
 
             start_point = rate.flow.start_point
             end_point = rate.flow.end_point
 
-            rate_index = FD.names_hidden_map[rate.name]
+            rate_index = flow_diagram.names_hidden_map[rate.name]
 
             if start_point != 'None':
-                start_index = FD.names_units_map[start_point]
-                W_ry[rate_index, start_index] = -FD.dT
+                start_index = flow_diagram.names_units_map[start_point]
+                W_ry[rate_index, start_index] = -flow_diagram.dT
 
             if end_point != 'None':
-                end_index = FD.names_units_map[end_point]
-                W_ry[rate_index, end_index] = FD.dT
+                end_index = flow_diagram.names_units_map[end_point]
+                W_ry[rate_index, end_index] = flow_diagram.dT
 
             # for inf_sourse, coef in rate.expression.elements.items():
             #     W[FD.names_units_map[inf_sourse], rate_index] = coef
@@ -131,11 +134,11 @@ class FDRNNConverter(object):
     def print_w(self, W):
         for i in range(W.shape[0]):
             for j in range(W.shape[1]):
-                for key, value in self.FD.names_units_map.items():
+                for key, value in self.flow_diagram.names_units_map.items():
                     if value == i:
                         infsource = key
 
-                for key, value in self.FD.names_hidden_map.items():
+                for key, value in self.flow_diagram.names_hidden_map.items():
                     if value == j:
                         rate = key
 

@@ -4,16 +4,16 @@ import pandas as pd
 from definitions import *
 from files_description import eho_description
 from module.almazov_dataset_processing.data_files_processing.columns_processing import prepare_columns, delete_nan_ids, time_to_my_format, code_to_my_format
-from module.data_loader import read_data, write_data
+from module.data_loader import read_data, write_to_csv
 
 
-def __first_read_eho(file_name: str, id_columns: List[str], DEMO: bool = False) -> pd.DataFrame:
+def __read_raw_eho_file(file_name: str, id_columns: List[str], DEMO: bool = False) -> pd.DataFrame:
     data_frame = read_data(file_name, delimiter='\t')
 
     if DEMO:
         sample = data_frame.head(20)
         data_frame = sample
-        write_data(sample, path_join(BASE_FILES, 'eho_sample.csv'))
+        write_to_csv(sample, path_join(BASE_FILES, 'eho_sample.csv'))
 
     print('before preprocessing {}'.format(data_frame.shape))
     data_frame = delete_nan_ids(data_frame, id_columns)
@@ -113,12 +113,13 @@ def __prepare_eho_categorical_columns(data: pd.DataFrame) -> pd.DataFrame:
 
 
 def main(input_file: str, output_file: str) -> None:
-    data = __first_read_eho(input_file, eho_description['id_columns'])
+    logging.info('Start processing events file')
+    data = __read_raw_eho_file(input_file, eho_description['id_columns'])
     data = __prepare_eho_categorical_columns(data)
 
     data = prepare_columns(data, eho_description, '%Y%m%d%H%M')
-    write_data(data, output_file)
-    print('Eho was processed')
+    write_to_csv(data, output_file)
+    logging.info('Eho was processed')
 
 
 if __name__ == '__main__':

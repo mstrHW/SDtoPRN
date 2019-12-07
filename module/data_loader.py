@@ -16,7 +16,7 @@ def read_data(file_name, encoding='CP1251', delimiter='\t'):
     return df
 
 
-def write_data(data, file_name, encoding='CP1251'):
+def write_to_csv(data, file_name, encoding='CP1251'):
     data.to_csv(file_name, sep='\t',  encoding=encoding, index=False, na_rep='NaN')
 
 

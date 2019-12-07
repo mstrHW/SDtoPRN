@@ -42,15 +42,15 @@ def prepare_float_columns(data_frame: pd.DataFrame, float_columns: List[str]) ->
 def prepare_categorical_columns(data_frame: pd.DataFrame, categorical_columns: List[str]) -> pd.DataFrame:
     for column in categorical_columns:
         unique_symbols = get_unique_symbols(data_frame, column)
-        data_frame[column] = data_frame[column].replace(unique_symbols)
+        data_frame.loc[:, column] = data_frame[column].replace(unique_symbols)
 
     return data_frame
 
 
 def prepare_date_columns(data_frame: pd.DataFrame, date_columns: List[str], date_format: str) -> pd.DataFrame:
     for column in date_columns:
-        data_frame[column] = data_frame[column].map(lambda x: __get_my_format_date(x, date_format))
-        data_frame = data_frame.loc[data_frame[column] != dates_processing.NULL_DATE]
+        data_frame.loc[:, column] = data_frame[column].map(lambda x: __get_my_format_date(x, date_format))
+        data_frame = data_frame[data_frame[column] != dates_processing.NULL_DATE]
 
     return data_frame
 

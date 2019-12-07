@@ -5,7 +5,7 @@ from definitions import *
 from module.data_loader import read_data
 
 
-def get_unique_symbols(data_frame: pd.DataFrame, column: str) -> Dict[str]:
+def get_unique_symbols(data_frame: pd.DataFrame, column: str) -> Dict[str, str]:
     _uniq = data_frame.loc[:, column].unique()
     uniq = _uniq.tolist()
     symbols = dict()
@@ -14,7 +14,7 @@ def get_unique_symbols(data_frame: pd.DataFrame, column: str) -> Dict[str]:
         symbols[np.nan] = 0
         uniq.remove(np.nan)
         start_i = 1
-    [symbols.update({word:(i+start_i)}) for i, word in enumerate(uniq)]
+    [symbols.update({word: (i+start_i)}) for i, word in enumerate(uniq)]
     return symbols
 
 

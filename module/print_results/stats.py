@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import seaborn as sns
 from scipy.stats import gaussian_kde
+from definitions import path_join
 
 
 def mean_confidence_interval(data, confidence=0.95):
@@ -56,6 +57,23 @@ def get_mae(output, Y, step=0, column=None):
     return mae
 
 
+def plot_two_graphs(y1, y2, title, images_dir):
+    plt.plot(y1, label='simulated')
+    plt.plot(y2, label='true')
+
+    # min_ylim = min(y2) # for big values bug
+    # max_ylim = max(y2)
+    # plt.ylim(min_ylim, max_ylim)
+
+    plt.grid()
+    plt.legend()
+    plt.title(title)
+
+    image_path = path_join(images_dir, title + '.png')
+    plt.savefig(image_path)
+    plt.gcf().clear()
+
+
 def plot_distribution(x, title,images_dir):
     # density = gaussian_kde(x)
     plt.figure(figsize=(8, 8))
@@ -76,13 +94,19 @@ def biplot(x, y, title, images_dir):
     plt.figure(figsize=(8, 8))
     plt.scatter(x, y)
     plt.grid()
-    plt.ylim(min(min(x), min(y)), max(max(x), max(y)))
+
+    min_ylim = min(min(x), min(y))
+    max_ylim = max(max(x), max(y))
+
+    plt.ylim(min_ylim, max_ylim)
+
     plt.xlabel('correct value')
     plt.ylabel('ANN value')
     plt.title(title)
 
     # plt.show()
-    plt.savefig(images_dir + title + '.png')
+    image_path = path_join(images_dir, title + '.png')
+    plt.savefig(image_path)
     plt.gcf().clear()
 
 

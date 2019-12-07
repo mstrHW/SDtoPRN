@@ -4,16 +4,16 @@ from definitions import *
 from files_description import events_description
 from module.almazov_dataset_processing.data_files_processing.columns_processing import prepare_columns, delete_nan_ids, time_to_my_format
 from module.almazov_dataset_processing.data_analysis import get_unique_symbols
-from module.data_loader import read_data, write_data
+from module.data_loader import read_data, write_to_csv
 
 
-def __first_read_events(file_name: str, id_columns: List[str], DEMO: bool = False) -> pd.DataFrame:
+def __read_raw_events_file(file_name: str, id_columns: List[str], DEMO: bool = False) -> pd.DataFrame:
     data_frame = read_data(file_name, encoding='UTF-8', delimiter='\t')
 
     if DEMO:
         sample = data_frame.head(1000)
         data_frame = sample
-        write_data(sample, path_join(BASE_FILES, 'events_sample.csv'))
+        write_to_csv(sample, path_join(BASE_FILES, 'events_sample.csv'))
 
     data_frame = delete_nan_ids(data_frame, id_columns)
     data_frame['time'] = data_frame['time'].apply(time_to_my_format)
@@ -55,12 +55,13 @@ def __standardize_events(data_frame: pd.DataFrame) -> pd.DataFrame:
 
 
 def main(input_file: str, output_file: str) -> None:
-    data = __first_read_events(input_file, events_description['id_columns'])
+    logging.info('Start processing events file')
+    data = __read_raw_events_file(input_file, events_description['id_columns'])
     data = __standardize_events(data)
     data = prepare_columns(data, events_description, '%Y%m%d%H%M')
 
-    write_data(data, output_file)
-    print('Events was processed')
+    write_to_csv(data, output_file)
+    logging.info('Events was processed')
 
 
 if __name__ == '__main__':

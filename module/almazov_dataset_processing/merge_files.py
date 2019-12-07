@@ -4,7 +4,7 @@ import pandas as pd
 from files_description import *
 from definitions import *
 
-from module.data_loader import read_data, write_data
+from module.data_loader import read_data, write_to_csv
 from module.almazov_dataset_processing.data_files_processing.dates_processing import NULL_DATE
 
 
@@ -135,7 +135,7 @@ def main(input_dir=CLEARED_DIR, output_dir=MERGED_DIR):
     result_frame = add_columns_from_events(result_frame, input_dir)
     result_frame = add_columns_from_eho(result_frame, input_dir)
 
-    write_data(result_frame, os.path.join(output_dir, 'merged.csv'))
+    write_to_csv(result_frame, os.path.join(output_dir, 'merged.csv'))
 
 
 if __name__ == '__main__':

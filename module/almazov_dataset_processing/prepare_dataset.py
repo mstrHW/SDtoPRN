@@ -1,5 +1,5 @@
 from files_description import labresult_description
-from module.data_loader import write_data
+from module.data_loader import write_to_csv
 
 from module.almazov_dataset_processing.data_analysis import *
 from module.almazov_dataset_processing.data_files_processing.dates_processing import *
@@ -241,7 +241,7 @@ def main(using_columns, input_dir=MERGED_DIR, output_dir=FINAL_DIR):
     result_frame = prepare_labresult_thresholds(result_frame)
     result_frame = clean_episode_dates(result_frame, labresult_description['date_columns'])
 
-    write_data(result_frame, os.path.join(output_dir, 'dataset.csv'))
+    write_to_csv(result_frame, os.path.join(output_dir, 'dataset.csv'))
 
 
 if __name__ == '__main__':

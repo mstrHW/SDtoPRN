@@ -4,30 +4,20 @@ import pandas as pd
 from definitions import *
 from files_description import predst_description
 from module.almazov_dataset_processing.data_files_processing.columns_processing import prepare_columns, delete_nan_ids, time_to_my_format, code_to_my_format
-from module.data_loader import write_data
+from module.data_loader import write_to_csv
 
 
-def __first_read_predst(file_name: str, id_columns: List[str], DEMO: bool = False) -> pd.DataFrame:
-    data_frame = __first_read_data_predst(file_name, encoding='UTF-8', delimiter='\t')
+def __read_raw_predst_file(file_name: str, DEMO: bool = False) -> pd.DataFrame:
+    encoding = 'UTF-8'
+    delimiter = '\t'
 
-    if DEMO:
-        data_frame = data_frame.head(1000)
-        write_data(data_frame, path_join(BASE_FILES, 'predst_sample.csv'))
-
-    data_frame = delete_nan_ids(data_frame, id_columns)
-    data_frame['time'] = data_frame['time'].apply(time_to_my_format)
-    data_frame['date'] += data_frame['time']
-    data_frame['id'] = data_frame['id'].apply(code_to_my_format)
-    data_frame = data_frame.drop('time', axis=1)
-    return data_frame
-
-
-def __first_read_data_predst(file_name: str, encoding: str = 'CP1251', delimiter: str = ';') -> pd.DataFrame:
     data = []
     in_file = open(file_name, 'r', encoding=encoding)
     columns = in_file.readline()
     columns = columns.replace('\n', '').split(delimiter)
-    print(columns)
+
+    logging.info('Predst columns: {}'.format(columns))
+
     columns[0] = columns[0][1:]
     for row in in_file:
         row = row.replace('\n', '')
@@ -37,6 +27,11 @@ def __first_read_data_predst(file_name: str, encoding: str = 'CP1251', delimiter
     df = pd.DataFrame(data=data, columns=columns)
     df = df.replace(r'', 'NA', regex=False)
     df = df.replace('NA', np.nan)
+
+    if DEMO:
+        data_frame = df.head(1000)
+        write_to_csv(data_frame, path_join(BASE_FILES, 'predst_sample.csv'))
+
     return df
 
 
@@ -80,11 +75,22 @@ def __standardize_condition_predst(key: str) -> str:
 
 
 def main(input_file: str, output_file: str) -> None:
-    data = __first_read_predst(input_file, predst_description['id_columns'])
+    logging.info('Start processing predst file')
+    data = __read_raw_predst_file(input_file)
+
+    data = delete_nan_ids(data, predst_description['id_columns'])
+
+    data['time'] = data['time'].apply(time_to_my_format)
+    data['date'] += data['time']
+    data['id'] = data['id'].apply(code_to_my_format)
+
+    data = data.drop('time', axis=1)
+
     data = __prepare_predst_conditions(data)
     data = prepare_columns(data, predst_description, '%Y%m%d%H%M')
-    write_data(data, output_file)
-    print('Predst was processed')
+    write_to_csv(data, output_file)
+
+    logging.info('Predst was processed')
 
 
 if __name__ == '__main__':

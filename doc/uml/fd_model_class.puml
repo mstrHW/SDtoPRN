@@ -1,0 +1,33 @@
+@startuml
+
+class FD
+class Constant
+class InformationSource
+class Expression
+class Flow
+class Rate
+
+
+FD *-- Constant
+FD *-- InformationSource
+FD *-- Expression
+FD *-- Flow
+FD *-- Rate
+
+class FDRNNConverter
+
+
+FDRNNConverter --> FD : use
+
+class ArrayList {
+Object[] elementData
+size()
+}
+
+enum TimeUnit {
+DAYS
+HOURS
+MINUTES
+}
+
+@enduml

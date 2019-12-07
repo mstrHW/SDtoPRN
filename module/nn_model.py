@@ -1,4 +1,4 @@
-import tensorflow as tf
+from definitions import tf
 import numpy as np
 
 my_float = tf.float64

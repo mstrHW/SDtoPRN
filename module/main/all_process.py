@@ -419,6 +419,12 @@ def medical():
     _tmp_params = case_params()
     my_params = Params('', case, mask, simulation_type, _tmp_params[0], _tmp_params[1], period)
     my_params.load_data()
+
+    data_directory = ''
+    train_X = np.load('{}X.npy'.format(data_directory)).astype(float)
+    train_Y = np.load('{}Y.npy'.format(data_directory)).astype(float)
+    names = np.load('{}names.npy'.format(data_directory)).astype(float)
+
     print(my_params.names)
     my_params.names = my_params.names[1:-1]
 
@@ -453,64 +459,6 @@ def plot_track(xs, ys, title, images_dir):
     # plt.show()
     plt.savefig(images_dir + title + '.png')
     plt.gcf().clear()
-
-
-def prepator_prey():
-    simulation_type = 1
-    case = 1
-    mask = 'predator_prey_{}'.format(case)
-
-    vensim_name = 'Lotka-Volterra.mdl'
-    vensim_file = '../vensim_models/{}'.format(vensim_name)
-    train_X, train_Y, period, names = generate_pysd_data(vensim_file)
-    _tmp_params = case_params()
-    my_params = Params(vensim_file, case, mask, simulation_type, _tmp_params[0], _tmp_params[1], period)
-    my_params.train_X = train_X
-    my_params.train_Y = train_Y
-    my_params.test_X = train_X
-    my_params.test_Y = train_Y
-    my_params.period = period
-    my_params.names = names
-
-    # print(names)
-    # input_names = train_rnn(my_params)
-    # hidden_names = test_rnn(my_params)
-    # test_sd(my_params)
-    rnn_model, input_names, hidden_names = create_rnn(my_params)
-    # _mask = [True if name in input_names else False for name in my_params.names]
-    # print('###=== Input names ===###')
-    # print(input_names)
-    # print('###=== Hidden names ===###')
-    # print(hidden_names)
-    #
-    W = np.load('{}W_{}.npy'.format(my_params.simulations_dir, my_params.mask))
-    # get_weights(my_params, W, 0)
-    #
-    print(input_names)
-    for i, name in enumerate(hidden_names):
-        print(name)
-        print(get_weights(my_params, W, i))
-    # test_rnn(my_params)
-    # output = np.load('{}rnn_output_{}.npy'.format(my_params.simulations_dir, my_params.full_mask))
-    # dt = 0.125
-    # xs1 = [i * dt for i in range(output.shape[0])]
-    # xs2 = [i * dt for i in range(my_params.test_X.shape[0])]
-    # for name in hidden_names:
-    #     column_index = hidden_names.index(name)
-    #     column_track = output[:, column_index]
-    #     plot_track(xs1, column_track, name + ' (ANN Model)', my_params.images_dir)
-    #     column_track = my_params.test_X[:, column_index]
-    #     plot_track(xs2, column_track, name + ' (SD model)', my_params.images_dir)
-    # W1 = np.load('{}W_{}.npy'.format(my_params.simulations_dir, my_params.mask))
-
-    # case = 2
-    # my_params = Params(vensim_file, case, mask, simulation_type, _tmp_params[0], _tmp_params[1], period)
-    # W2 = np.load('{}W_{}.npy'.format(my_params.simulations_dir, my_params.mask))
-
-    # test_rnn(my_params)
-    # test_sd(my_params)
-
-    # print((W1 == W2).min())
 
 
 def linear_regression():

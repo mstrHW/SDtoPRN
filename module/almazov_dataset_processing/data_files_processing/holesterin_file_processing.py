@@ -3,15 +3,15 @@ import pandas as pd
 from definitions import *
 from files_description import holesterin_description
 from module.almazov_dataset_processing.data_files_processing.columns_processing import prepare_columns, delete_nan_ids, time_to_my_format
-from module.data_loader import read_data, write_data
+from module.data_loader import read_data, write_to_csv
 
 
-def __first_read_holesterin(file_name: str, id_columns: List[str], DEMO: bool = False) -> pd.DataFrame:
+def __read_raw_holesterin_file(file_name: str, id_columns: List[str], DEMO: bool = False) -> pd.DataFrame:
     data_frame = read_data(file_name, delimiter=';')
 
     if DEMO:
         data_frame = data_frame.head(1000)
-        write_data(data_frame, path_join(BASE_FILES, 'events_sample.csv'))
+        write_to_csv(data_frame, path_join(BASE_FILES, 'events_sample.csv'))
 
     data_frame = delete_nan_ids(data_frame, id_columns)
     data_frame['timev -'] = data_frame['timev -'].apply(time_to_my_format)
@@ -60,12 +60,13 @@ def __add_diag_columns(group: pd.DataFrame) -> pd.DataFrame:
 
 
 def main(input_file: str, output_file: str) -> None:
-    data = __first_read_holesterin(input_file, holesterin_description['id_columns'])
+    logging.info('Start processing holesterin file')
+    data = __read_raw_holesterin_file(input_file, holesterin_description['id_columns'])
     data = __prepare_holesterin_diagnosis(data)
 
     data = prepare_columns(data, holesterin_description, '%d%m%Y%H%M')
-    write_data(data, output_file)
-    print('Holesterin was processed')
+    write_to_csv(data, output_file)
+    logging.info('Holesterin was processed')
 
 
 if __name__ == '__main__':

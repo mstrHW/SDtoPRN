@@ -1,7 +1,7 @@
 import numpy as np
 
 from definitions import *
-from module.data_loader import read_data, write_data
+from module.data_loader import read_data, write_to_csv
 import module.almazov_dataset_processing.data_files_processing as cf
 from module.almazov_dataset_processing import convert_to_periodic_data, merge_files, prepare_dataset, filling_methods, generate_data_for_rnn
 
@@ -26,7 +26,7 @@ def __fill_missing_data(target_columns: Dict[str, List]) -> None:
     data_frame[target_columns['continuous']] = data_frame[target_columns['continuous']].astype(float)
     data_frame[target_columns['categorical']] = data_frame[target_columns['categorical']].astype(float)
     result_frame = filling_methods.fill_by_groups(data_frame, target_columns['continuous'], target_columns['categorical'])
-    write_data(result_frame, output_file)
+    write_to_csv(result_frame, output_file)
 
 
 def __generate_periodic_data(using_columns: List[str], period: int = 6, method: str = 'nearest') -> None:
@@ -38,7 +38,7 @@ def __generate_periodic_data(using_columns: List[str], period: int = 6, method: 
     result_frame = convert_to_periodic_data.__remove_patients_without_tracks(data_frame)
     result_frame = convert_to_periodic_data.generate_periodic_data(result_frame, using_columns, period, method)
 
-    write_data(result_frame, output_file)
+    write_to_csv(result_frame, output_file)
 
 
 def __create_dataset(using_columns: List[str], period: int = 12, method: str = 'time', need_scale: bool = False) -> None:

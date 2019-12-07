@@ -1,0 +1,368 @@
+{UTF-8}
+hematocrit=A FUNCTION OF(hematocrit,aspartate aminotransferase,blood pressure,glucose\
+		,troponin level) ~~|
+hematocrit= INTEG (
+	,
+		)
+	~	
+	~		|
+
+red blood cells=A FUNCTION OF(red blood cells,hematocrit,hemoglobin level) ~~|
+red blood cells= INTEG (
+	,
+		)
+	~	
+	~		|
+
+troponin level  = A FUNCTION OF( aspartate aminotransferase,glucose,-miocard's condition\
+		,red blood cells) ~~|
+troponin level= INTEG (
+	-miocard's condition,
+		100)
+	~	ng/ml
+	~		|
+
+glucose  = A FUNCTION OF( kreatinin,red blood cells)
+	~	
+	~		|
+
+hemoglobin level=A FUNCTION OF(hemoglobin level,aspartate aminotransferase,bleeding,hematocrit\
+		) ~~|
+hemoglobin level= INTEG (
+	,
+		100)
+	~	g/l
+	~		|
+
+alanine aminotransferase  = A FUNCTION OF( hematocrit,troponin level)
+	~	
+	~		|
+
+kreatinin  = A FUNCTION OF( glucose,troponin level)
+	~	
+	~		|
+
+aspartate aminotransferase=A FUNCTION OF(aspartate aminotransferase,alanine aminotransferase\
+		) ~~|
+aspartate aminotransferase= INTEG (
+	,
+		)
+	~	
+	~		|
+
+leukocyte count  = A FUNCTION OF( hematocrit,kreatinin,-miocard's condition,troponin level\
+		) ~~|
+leukocyte count= INTEG (
+	-miocard's condition,
+		100)
+	~	
+	~		|
+
+patient's condition  = A FUNCTION OF( alanine aminotransferase,-complications,-effectiveness of treatment\
+		,glucose,red blood cells,severity of disease course,troponin level) ~~|
+patient's condition= INTEG (
+	-complications*severity of disease course*(1-effectiveness of treatment),
+		100)
+	~	condition rate
+	~		|
+
+accompanying illnesses  = A FUNCTION OF( angina pectoris,diabetes,congestive heart failure\
+		,hypertension,smoking) ~~|
+accompanying illnesses= INTEG (
+	smoking,
+		0)
+	~	
+	~		|
+
+bleeding  = A FUNCTION OF( platelet count,red blood cells,SOFA) ~~|
+bleeding=
+	platelet count*received treatment
+	~	
+	~		|
+
+blood pressure  = A FUNCTION OF( hypertension) ~~|
+blood pressure=
+	~	
+	~		|
+
+miocard's condition  = A FUNCTION OF( -ACS,bmi,-duration from the beginning,congestive heart failure\
+		,oxygen level,SOFA) ~~|
+miocard's condition= INTEG (
+	-deviation of weight*-duration from the beginning*-ACS*oxygen level,
+		0)
+	~	rate
+	~		|
+
+platelet count=A FUNCTION OF(platelet count,Myocardial contractility) ~~|
+platelet count= INTEG (
+	,
+		100)
+	~	
+	~		|
+
+hypertension=A FUNCTION OF(hypertension) ~~|
+hypertension=
+	~	
+	~		|
+
+age  = A FUNCTION OF( )
+	~	
+	~		|
+
+angina pectoris=A FUNCTION OF(angina pectoris) ~~|
+angina pectoris=
+	~	
+	~		|
+
+bmi=A FUNCTION OF(bmi) ~~|
+bmi=
+	~	kilograms
+	~		|
+
+Poor mobility  = A FUNCTION OF( )
+	~	
+	~		|
+
+diabetes=A FUNCTION OF(diabetes) ~~|
+diabetes=
+	~	
+	~		|
+
+smoking  = A FUNCTION OF( ) ~~|
+smoking=
+	20*(1-health education)
+	~	years
+	~		|
+
+SOFA  = A FUNCTION OF( blood pressure) ~~|
+SOFA=
+	~	
+	~		|
+
+effectiveness of treatment  = A FUNCTION OF( patient's condition) ~~|
+effectiveness of treatment=
+	patient's condition*received treatment
+	~	
+	~		|
+
+Euroscore  = A FUNCTION OF( age,angina pectoris,diabetes,extracardiac arteriopathy,gender\
+		,Poor mobility,renal impairment)
+	~	
+	~		|
+
+extracardiac arteriopathy=A FUNCTION OF(extracardiac arteriopathy) ~~|
+extracardiac arteriopathy=
+	~	
+	~		|
+
+gender  = A FUNCTION OF( )
+	~	
+	~		|
+
+congestive heart failure=A FUNCTION OF(congestive heart failure) ~~|
+congestive heart failure=
+	~	
+	~		|
+
+renal impairment  = A FUNCTION OF( )
+	~	
+	~		|
+
+Myocardial contractility  = A FUNCTION OF( miocard's condition)
+	~	
+	~		|
+
+severity of disease course  = A FUNCTION OF( accompanying illnesses rate,duration from the beginning\
+		) ~~|
+severity of disease course=
+	accompanying illnesses rate*duration from the beginning rate
+	~	severity rate
+	~		|
+
+accompanying illnesses rate=
+	accompanying illnesses
+	~	
+	~		|
+
+ACS=
+	0
+	~	
+	~		|
+
+complications= INTEG (
+	accompanying illnesses rate*severity of disease course,
+		0)
+	~	complications rate
+	~		|
+
+duration from the beginning= INTEG (
+	1,
+		0)
+	~	months
+	~		|
+
+duration of treatment= INTEG (
+	patient's condition,
+		0)
+	~	
+	~		|
+
+oxygen level= INTEG (
+	hemoglobin level*miocard's condition*smoking,
+		1)
+	~	rate
+	~		|
+
+********************************************************
+	.Control
+********************************************************~
+		Simulation Control Parameters
+	|
+
+FINAL TIME  = 100
+	~	Month
+	~	The final time for the simulation.
+	|
+
+INITIAL TIME  = 0
+	~	Month
+	~	The initial time for the simulation.
+	|
+
+SAVEPER  = 
+        TIME STEP
+	~	Month [0,?]
+	~	The frequency with which output is stored.
+	|
+
+TIME STEP  = 1
+	~	Month [0,?]
+	~	The time step for the simulation.
+	|
+
+\\\---/// Sketch information - do not modify anything except names
+V300  Do not put anything below this section - it will be ignored
+*View 1
+$192-192-192,0,Times New Roman|12||0-0-0|0-0-0|0-0-255|-1--1--1|-1--1--1|96,96,100,0
+10,1,patient's condition,1484,275,40,20,3,3,0,12,0,0,0,0,-1--1--1,128-192-0,|14||0-0-0
+12,2,48,1580,167,10,8,0,3,0,0,-1,0,0,0
+1,3,5,1,4,0,0,22,0,0,0,-1--1--1,,1|(1470,216)|
+1,4,5,2,100,0,0,22,0,0,0,-1--1--1,,1|(1523,170)|
+11,5,48,1470,170,6,8,34,3,0,0,1,0,0,0
+10,6,severity of disease course,1470,198,55,20,40,131,0,8,-1,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+12,7,48,1644,217,10,8,0,3,0,0,-1,0,0,0
+1,8,10,7,4,0,0,22,0,0,0,-1--1--1,,1|(1644,245)|
+1,9,10,1,100,0,0,22,0,0,0,-1--1--1,,1|(1581,274)|
+11,10,48,1644,274,6,8,34,3,0,0,1,0,0,0
+10,11,effectiveness of treatment,1644,302,60,20,40,131,0,8,-1,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+1,12,1,10,1,0,0,0,0,64,0,-1--1--1,,1|(1595,222)|
+10,13,smoking,659,447,32,11,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+10,14,bmi,875,299,16,11,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+10,15,miocard's condition,731,257,40,20,3,3,0,8,0,0,0,0,-1--1--1,128-192-0,|14||0-0-0
+10,16,duration from the beginning,1141,132,52,20,3,131,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+10,17,ACS,696,152,19,11,8,131,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+1,18,17,15,1,0,0,0,0,64,0,-1--1--1,,1|(712,187)|
+1,19,16,15,1,0,0,0,0,64,0,-1--1--1,,1|(936,193)|
+10,20,accompanying illnesses,1021,387,56,18,3,131,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+1,21,13,20,1,0,0,0,0,64,0,-1--1--1,,1|(813,433)|
+10,22,complications,1288,275,44,17,3,131,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+1,23,5,22,1,0,0,0,0,64,0,-1--1--1,,1|(1394,208)|
+10,24,accompanying illnesses rate,1147,226,55,20,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+1,25,20,24,1,0,0,0,0,64,0,-1--1--1,,1|(1010,310)|
+1,26,24,5,1,0,0,0,0,64,0,-1--1--1,,1|(1308,174)|
+1,27,24,22,1,0,0,0,0,64,0,-1--1--1,,1|(1203,267)|
+1,28,22,1,0,0,0,0,0,64,0,-1--1--1,,1|(1381,275)|
+10,29,duration of treatment,1568,376,40,20,3,3,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+1,30,1,29,0,0,0,0,0,64,0,-1--1--1,,1|(1521,320)|
+10,31,troponin level,747,494,40,20,3,3,0,12,0,0,0,0,-1--1--1,128-192-0,|14||0-0-0
+10,32,oxygen level,469,345,40,20,3,3,0,12,0,0,0,0,-1--1--1,128-192-0,|14||0-0-0
+10,33,leukocyte count,593,382,40,20,3,3,0,12,0,0,0,0,-1--1--1,128-192-0,|14||0-0-0
+10,34,hemoglobin level,352,282,46,18,3,131,0,12,0,0,0,0,-1--1--1,128-192-0,|14||0-0-0
+10,35,platelet count,486,150,40,20,3,3,0,12,0,0,0,0,-1--1--1,128-192-0,|14||0-0-0
+10,36,bleeding,363,175,32,11,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+1,37,35,36,1,0,0,0,0,64,0,-1--1--1,,1|(422,147)|
+1,38,36,34,1,0,0,0,0,64,0,-1--1--1,,1|(342,212)|
+1,39,34,32,1,0,0,0,0,64,0,-1--1--1,,1|(413,312)|
+1,40,32,15,1,0,0,0,0,64,0,-1--1--1,,1|(610,226)|
+1,41,15,32,1,0,0,0,0,64,0,-1--1--1,,1|(604,323)|
+1,42,15,31,0,0,0,0,0,64,0,-1--1--1,,1|(738,368)|
+1,43,15,33,0,0,0,0,0,64,0,-1--1--1,,1|(667,314)|
+1,44,13,32,1,0,0,0,0,64,0,-1--1--1,,1|(553,433)|
+10,45,diabetes,935,459,31,11,8,131,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+10,46,hypertension,996,101,48,11,8,131,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+10,47,angina pectoris,1022,479,56,11,8,131,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+10,48,congestive heart failure,948,263,61,20,8,131,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+1,49,46,20,1,0,0,0,0,64,0,-1--1--1,,1|(1067,273)|
+1,50,45,20,1,0,0,0,0,64,0,-1--1--1,,1|(959,418)|
+1,51,47,20,1,0,0,0,0,64,0,-1--1--1,,1|(1023,443)|
+10,52,blood pressure,861,77,55,11,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+10,53,Myocardial contractility,596,152,45,20,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+1,54,53,35,1,0,0,0,0,64,0,-1--1--1,,1|(541,139)|
+10,55,Euroscore,1010,555,39,11,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+10,56,age,865,501,14,11,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+10,57,gender,874,569,26,11,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+10,58,renal impairment,1157,440,43,20,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+10,59,extracardiac arteriopathy,1171,502,46,20,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+10,60,Poor mobility,1187,562,51,11,8,3,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+1,61,59,55,0,0,0,0,0,64,0,-1--1--1,,1|(1090,528)|
+1,62,56,55,0,0,0,0,0,64,0,-1--1--1,,1|(922,522)|
+1,63,58,55,0,0,0,0,0,64,0,-1--1--1,,1|(1083,497)|
+1,64,57,55,0,0,0,0,0,64,0,-1--1--1,,1|(928,563)|
+1,65,60,55,0,0,0,0,0,64,0,-1--1--1,,1|(1099,558)|
+1,66,47,55,1,0,0,0,0,64,0,-1--1--1,,1|(1019,522)|
+1,67,15,53,1,0,0,0,0,64,0,-1--1--1,,1|(667,190)|
+10,68,SOFA,799,156,25,11,8,131,0,8,0,0,0,0,-1--1--1,0-0-0,|14||0-0-0
+1,69,52,68,1,0,0,0,0,64,0,-1--1--1,,1|(831,95)|
+1,70,16,5,1,0,0,0,0,64,0,-1--1--1,,1|(1331,106)|
+1,71,45,55,1,0,0,0,0,64,0,-1--1--1,,1|(946,502)|
+1,72,68,15,1,0,0,0,0,64,0,-1--1--1,,1|(786,191)|
+1,73,68,36,1,0,0,0,0,64,0,-1--1--1,,1|(491,90)|
+1,74,14,15,1,0,0,0,0,64,0,-1--1--1,,1|(796,292)|
+1,75,48,15,1,0,0,0,0,64,0,-1--1--1,,1|(830,269)|
+1,76,46,52,1,0,0,0,0,64,0,-1--1--1,,1|(945,84)|
+10,77,red blood cells,220,213,40,20,3,3,0,12,0,0,0,0,-1--1--1,128-192-0,|14||0-0-0
+1,78,77,36,1,0,0,0,0,64,0,-1--1--1,,1|(262,168)|
+1,79,34,77,1,0,0,0,0,64,0,-1--1--1,,1|(248,271)|
+10,80,hematocrit,164,560,40,20,3,3,0,12,0,0,0,0,-1--1--1,128-192-0,|14||0-0-0
+10,81,aspartate aminotransferase,493,649,67,18,3,131,0,12,0,0,0,0,-1--1--1,128-192-0,|14||0-0-0
+10,82,alanine aminotransferase,325,589,67,21,3,131,0,12,0,0,0,0,-1--1--1,128-192-0,|14||0-0-0
+10,83,kreatinin,434,472,40,20,3,3,0,12,0,0,0,0,-1--1--1,128-192-0,|14||0-0-0
+10,84,glucose,624,682,40,20,3,3,0,12,0,0,0,0,-1--1--1,128-192-0,|14||0-0-0
+1,85,48,20,1,0,0,0,0,64,0,-1--1--1,,1|(944,333)|
+1,86,77,31,1,0,0,0,0,64,0,-1--1--1,,1|(239,344)|
+1,87,84,31,1,0,0,0,0,64,0,-1--1--1,,1|(772,600)|
+1,88,81,31,1,0,0,0,0,64,0,-1--1--1,,1|(697,549)|
+1,89,31,33,1,0,0,0,0,64,0,-1--1--1,,1|(617,478)|
+1,90,80,33,1,0,0,0,0,64,0,-1--1--1,,1|(334,409)|
+1,91,83,33,1,0,0,0,0,64,0,-1--1--1,,1|(516,436)|
+1,92,81,34,1,0,0,0,0,64,0,-1--1--1,,1|(371,498)|
+1,93,80,34,1,0,0,0,0,64,0,-1--1--1,,1|(181,398)|
+1,94,31,80,1,0,0,0,0,64,0,-1--1--1,,1|(461,503)|
+1,95,81,80,1,0,0,0,0,64,0,-1--1--1,,1|(220,661)|
+1,96,84,80,1,0,0,0,0,64,0,-1--1--1,,1|(250,697)|
+1,97,82,81,0,0,0,0,0,64,0,-1--1--1,,1|(405,618)|
+1,98,31,82,1,0,0,0,0,64,0,-1--1--1,,1|(512,530)|
+1,99,80,82,0,0,0,0,0,64,0,-1--1--1,,1|(224,570)|
+1,100,83,84,1,0,0,0,0,64,0,-1--1--1,,1|(555,556)|
+1,101,77,84,1,0,0,0,0,64,0,-1--1--1,,1|(64,638)|
+1,102,80,77,1,0,0,0,0,64,0,-1--1--1,,1|(119,420)|
+1,103,84,1,1,0,0,0,0,64,0,-1--1--1,,1|(784,736)|
+1,104,31,1,1,0,0,0,0,64,0,-1--1--1,,1|(936,618)|
+1,105,31,83,1,0,0,0,0,64,0,-1--1--1,,1|(586,470)|
+1,106,84,83,1,0,0,0,0,64,0,-1--1--1,,1|(517,604)|
+1,107,82,1,1,0,0,0,0,64,0,-1--1--1,,1|(889,792)|
+1,108,77,1,1,0,0,0,0,64,0,-1--1--1,,1|(974,683)|
+1,109,52,80,1,0,0,0,0,64,0,-1--1--1,,1|(492,65)|
+///---\\\
+:L<%^E!@
+9:Current1
+23:0
+15:0,0,0,0,0,0
+19:100,0
+27:0,
+34:0,
+4:Time
+5:oxygen level
+24:0
+25:7
+26:7
