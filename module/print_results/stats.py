@@ -59,7 +59,10 @@ def get_mae(output, Y, step=0, column=None):
 
 def plot_graphs(graphs, labels, model_name, images_dir):
     for graph, label in zip(graphs, labels):
-        plt.plot(graph, label=label)
+        line_style = '-'
+        if label != 'true_y':
+            line_style = '--'
+        plt.plot(graph, linestyle=line_style, label=label)
 
     # min_ylim = min(y2) # for big values bug
     # max_ylim = max(y2)

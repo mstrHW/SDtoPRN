@@ -13,6 +13,8 @@ import pickle
 
 from definitions import path_join, make_directory, VENSIM_MODELS_DIR, EXPERIMENTS_DIR, DATA_DIR
 from arch.base_nn import BaseNN
+from module.nn_model import NNModel
+from module.nn_model_log import NNModelLog
 
 
 def generate_train_data(fields, data):
@@ -110,7 +112,7 @@ def main(args):
 
     simulation_data, (X, Y) = generate_train_data(fields, data)
 
-    delimiter = int(0.5 * X.shape[0])
+    delimiter = int(0.7 * X.shape[0])
     train_X = X[:delimiter]
     train_Y = Y[:delimiter]
     test_X = X[delimiter:]
@@ -122,7 +124,7 @@ def main(args):
 
     ### === FD model to RNN === ###
     FDRNN_converter = FDRNNConverter(general_params['phi_h'], general_params['phi_o'])
-    rnn_model = FDRNN_converter.fd_to_rnn(FD)
+    rnn_model = FDRNN_converter.fd_to_rnn(FD, NNModel)
     levels = FD.levels
 
     levels_file = path_join(experiment_dir, 'levels')
