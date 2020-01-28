@@ -49,14 +49,17 @@ def time():
 def predator_births():
     """
     Real Name: b'predator births'
-    Original Eqn: b'(predator birth fraction*Prey Population)*Predator Population'
+    Original Eqn: b'EXP(LOG(Predator Population, EXP(1)) + LOG(predator birth fraction, EXP(1)) + LOG(Prey Population\\\\ , EXP(1)))'
     Units: b''
     Limits: (None, None)
     Type: component
 
     b''
     """
-    return (predator_birth_fraction() * prey_population()) * predator_population()
+    return np.exp(
+        functions.log(predator_population(), np.exp(1)) +
+        functions.log(predator_birth_fraction(), np.exp(1)) +
+        functions.log(prey_population(), np.exp(1)))
 
 
 @cache('run')
@@ -91,14 +94,16 @@ def predator_death_proportionality_constant():
 def predator_deaths():
     """
     Real Name: b'predator deaths'
-    Original Eqn: b'predator death proportionality constant*Predator Population'
+    Original Eqn: b'EXP(LOG(predator death proportionality constant, EXP(1)) + LOG(Predator Population, \\\\ EXP(1)))'
     Units: b''
     Limits: (None, None)
     Type: component
 
     b''
     """
-    return predator_death_proportionality_constant() * predator_population()
+    return np.exp(
+        functions.log(predator_death_proportionality_constant(), np.exp(1)) +
+        functions.log(predator_population(), np.exp(1)))
 
 
 @cache('step')
@@ -133,14 +138,16 @@ def prey_birth_fraction():
 def prey_births():
     """
     Real Name: b'prey births'
-    Original Eqn: b'prey birth fraction*Prey Population'
+    Original Eqn: b'EXP(LOG(prey birth fraction, EXP(1)) + LOG(Prey Population, EXP(1)))'
     Units: b''
     Limits: (None, None)
     Type: component
 
     b''
     """
-    return prey_birth_fraction() * prey_population()
+    return np.exp(
+        functions.log(prey_birth_fraction(), np.exp(1)) +
+        functions.log(prey_population(), np.exp(1)))
 
 
 @cache('run')
@@ -161,14 +168,17 @@ def prey_death_proportionality_constant():
 def prey_deaths():
     """
     Real Name: b'prey deaths'
-    Original Eqn: b'(prey death proportionality constant*Predator Population)*Prey Population'
+    Original Eqn: b'EXP(LOG(Predator Population, EXP(1)) + LOG(prey death proportionality constant, EXP(\\\\ 1)) + LOG(Prey Population, EXP(1)))'
     Units: b''
     Limits: (None, None)
     Type: component
 
     b''
     """
-    return (prey_death_proportionality_constant() * predator_population()) * prey_population()
+    return np.exp(
+        functions.log(predator_population(), np.exp(1)) +
+        functions.log(prey_death_proportionality_constant(), np.exp(1)) +
+        functions.log(prey_population(), np.exp(1)))
 
 
 @cache('step')

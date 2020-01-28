@@ -57,9 +57,9 @@ def get_mae(output, Y, step=0, column=None):
     return mae
 
 
-def plot_two_graphs(y1, y2, title, images_dir):
-    plt.plot(y1, label='simulated')
-    plt.plot(y2, label='true')
+def plot_graphs(graphs, labels, model_name, images_dir):
+    for graph, label in zip(graphs, labels):
+        plt.plot(graph, label=label)
 
     # min_ylim = min(y2) # for big values bug
     # max_ylim = max(y2)
@@ -67,6 +67,7 @@ def plot_two_graphs(y1, y2, title, images_dir):
 
     plt.grid()
     plt.legend()
+    title = '{} modeling with different models'.format(model_name)
     plt.title(title)
 
     image_path = path_join(images_dir, title + '.png')
@@ -100,8 +101,8 @@ def biplot(x, y, title, images_dir):
 
     plt.ylim(min_ylim, max_ylim)
 
-    plt.xlabel('correct value')
-    plt.ylabel('ANN value')
+    plt.xlabel('true value')
+    plt.ylabel('nn value')
     plt.title(title)
 
     # plt.show()

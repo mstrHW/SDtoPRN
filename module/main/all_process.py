@@ -219,7 +219,6 @@ def get_results(params):
     min_steps = steps_count
     max_steps = steps_count
 
-
     rnn_output = np.load('{}rnn_output_{}.npy'.format(params.simulations_dir, params.full_mask))
 
     column = 1
@@ -259,7 +258,7 @@ def get_results(params):
                 _o.append(_output[i][j])
 
         _Y = np.array(_y)
-        _output =  np.array(_o)
+        _output = np.array(_o)
 
         mae = np.absolute(_output - _Y)
 

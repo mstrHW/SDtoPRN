@@ -24,3 +24,10 @@ def np_preproc_for_rnn2d(numpy_array):
     X = numpy_array[:-1]
     Y = numpy_array[1:]
     return [X, Y]
+
+
+def np_preproc_for_rnn3d(numpy_array):
+    Xs = np.concatenate([group[1].values[:-1] for group in numpy_array], axis=0)
+    ys = np.concatenate([group[1].values[1:] for group in numpy_array], axis=0)
+
+    return Xs, ys

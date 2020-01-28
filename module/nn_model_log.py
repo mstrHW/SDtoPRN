@@ -6,7 +6,7 @@ import logging
 my_float = tf.float64
 
 
-class NNModel(object):
+class NNModelLog(object):
 
     def __init__(self, parameters):
         self.name = 'MyRNN'
@@ -27,9 +27,9 @@ class NNModel(object):
         # parameters = self.initialize_parameters(self.input_dim, self.hidden_dim, self.output_dim)
         parameters = self.parameters
 
-        self.y_pred = self.rnn_forward(self.X, parameters)
+        self.y_pred, regularizers = self.rnn_forward(self.X, parameters)
 
-        self.cost = self.compute_cost(self.y_pred, self.Y)
+        self.cost = self.compute_cost(self.y_pred, self.Y, regularizers)
         self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.cost)
 
         self.saver = tf.train.Saver(save_relative_paths=True)
@@ -72,40 +72,51 @@ class NNModel(object):
     def rnn_forward(self, x, parameters):
 
         at = x
-        yt_pred = self.rnn_cell_forward(x, at, parameters)
+        yt_pred, regularizers = self.rnn_cell_forward(x, at, parameters)
 
-        return yt_pred
+        return yt_pred, regularizers
 
     def rnn_cell_forward(self, xt, a_prev, parameters):
 
         W_xy = parameters['W_xy']
 
-        W_ah = parameters['W_ah']
+        self.W_ah = parameters['W_ah']
+        b_ah = parameters['b_ah']
+        self.W_ah_log = tf.Variable(self.W_ah.initialized_value())
+        b_ah_log = tf.Variable(b_ah.initialized_value())
 
         W_ry = parameters['W_ry']
 
         phi_h = parameters['phi_h']
         phi_o = parameters['phi_o']
 
-        ah = tf.matmul(a_prev, W_ah)
-        r = phi_h(ah)
+        ah = tf.matmul(a_prev, self.W_ah) + b_ah
 
-        ry = tf.matmul(r, W_ry)
+        a_prev_log = tf.log(a_prev)
+        ah_log = tf.matmul(a_prev_log, self.W_ah_log) + b_ah_log
+        ah_log = tf.exp(ah_log)
+
+        r = phi_h(ah + ah_log)
+
+        # ry = tf.matmul(ah, W_ry)
+        ry_log = tf.matmul(ah_log, W_ry)
         xy = tf.matmul(xt, W_xy)
 
-        yt_pred = phi_o(ry + xy)
+        yt_pred = phi_o(ry_log + xy)
 
-        return yt_pred
+        regularizers = tf.cast(tf.nn.l2_loss(self.W_ah) + tf.nn.l2_loss(self.W_ah_log), tf.float32)
 
-    def compute_cost(self, y_pred, y, regularization=0):
+        return yt_pred, regularizers
+
+    def compute_cost(self, y_pred, y, regularizers, regularization=0):
 
         # ez_nan = tf.abs((y_pred - y))/y
         mse = tf.losses.mean_squared_error(y_pred, y)
-        # rmse = tf.sqrt(mse)
-        mae = (tf.abs(y_pred - y))/y
+        rmse = tf.sqrt(mse)
+        mae = tf.abs(y_pred - y)/y
 
-        loss = mse
-        cost = tf.reduce_mean(loss + regularization)
+        loss = mse + regularization * regularizers
+        cost = tf.reduce_mean(loss)
 
         return cost
 
@@ -162,7 +173,7 @@ class NNModel(object):
                 lr = 0
                 count = 0
                 for train_x_batch, train_y_batch in zip(get_batches(train_x), get_batches(train_y)):
-                    _, _mse, _lr = sess.run([self.train_op, self.cost, self.learning_rate],
+                    _, _mse, _lr, _wah, _wah_log = sess.run([self.train_op, self.cost, self.learning_rate, self.W_ah, self.W_ah_log],
                                             feed_dict={self.X: train_x_batch, self.Y: train_y_batch,
                                                        self.learning_rate: learning_rate})
                     mse += _mse
@@ -170,7 +181,6 @@ class NNModel(object):
 
                     # print(mse)
                     # print(_wah)
-                    # print(_whr)
                     # count += 1
                     # if count == 2:
                     #     return
@@ -183,6 +193,9 @@ class NNModel(object):
                 if i % max(int(epochs_count * epochs_before_decay), 1) == 0:
                     learning_rate = learning_rate * decay_base
                     print(lr)
+            print(mse)
+            print(_wah)
+            print(_wah_log)
 
             writer.close()
             save_path = self.saver.save(sess, model_file)

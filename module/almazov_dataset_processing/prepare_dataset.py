@@ -169,20 +169,20 @@ def prepare_labresult_thresholds(df: pd.DataFrame) -> pd.DataFrame:
 
     print('after td and age : {}'.format(df.shape))
 
-    df = __prepare_by_thresholds(df, 'Troponin', 0.01, 50)    # TODO: config file for thresholds
-    df = __prepare_by_thresholds(df, 'ALT', 0.2, 3000)
-    df = __prepare_by_thresholds(df, 'AST', 1.4, 3000)
-    df = __prepare_by_thresholds(df, 'HGB', 40, 214)
-    df = __prepare_by_thresholds(df, 'RBC', 1, 9.8)
-    df = __prepare_by_thresholds(df, 'PLT', 2, 700)
-    df = __prepare_by_thresholds(df, 'Kreatinin', 18, 800)
-    df = __prepare_by_thresholds(df, 'Glucose', 2, 30)
-    print('after base columns : {}'.format(df.shape))
+    # df = __prepare_by_thresholds(df, 'Troponin', 0.01, 50)    # TODO: config file for thresholds
+    # df = __prepare_by_thresholds(df, 'ALT', 0.2, 3000)
+    # df = __prepare_by_thresholds(df, 'AST', 1.4, 3000)
+    # df = __prepare_by_thresholds(df, 'HGB', 40, 214)
+    # df = __prepare_by_thresholds(df, 'RBC', 1, 9.8)
+    # df = __prepare_by_thresholds(df, 'PLT', 2, 700)
+    # df = __prepare_by_thresholds(df, 'Kreatinin', 18, 800)
+    # df = __prepare_by_thresholds(df, 'Glucose', 2, 30)
+    # print('after base columns : {}'.format(df.shape))
 
     target_columns = columns
-    delete_columns = ['Troponin', 'ALT', 'AST', 'HGB', 'RBC', 'PLT', 'Kreatinin', 'Glucose']
-    for column in delete_columns:
-        target_columns.remove(column)
+    # delete_columns = ['Troponin', 'ALT', 'AST', 'HGB', 'RBC', 'PLT', 'Kreatinin', 'Glucose']
+    # for column in delete_columns:
+    #     target_columns.remove(column)
 
     for column in target_columns:
         lower, upper, count = get_percentile(df[column], [0, 97.5])

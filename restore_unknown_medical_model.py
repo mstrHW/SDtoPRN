@@ -1,49 +1,28 @@
 from module.fd_model.fd_rnn_converter import FDRNNConverter
 from module.fd_model.vensim_fd_converter import get_fd, KNOWN_MODEL, UNKNOWN_MODEL
-from module.data_loader import np_preproc_for_rnn2d
+from module.data_loader import np_preproc_for_rnn2d, np_preproc_for_rnn3d
 from module.print_results.stats import biplot, plot_graphs
 
 import numpy as np
+import pandas as pd
 import pysd
 import logging
 import argparse
 from sklearn import preprocessing
 import pickle
 
-from module.nn_model import NNModel
-from module.nn_model_log import NNModelLog
-
-from definitions import path_join, make_directory, VENSIM_MODELS_DIR, EXPERIMENTS_DIR
+from definitions import path_join, make_directory, VENSIM_MODELS_DIR, EXPERIMENTS_DIR, DATA_DIR
+from arch.base_nn import BaseNN
 
 
-def case2():
-    # the model and coefficients are unknown
-
-    general_params =\
-        {
-            'mode': UNKNOWN_MODEL,
-            'seq_size': 200,
-            'phi_h': lambda x: x,
-            'phi_o': lambda x: x,
-            'dt': 0.125
-            # 'dt': 0.03125
-        }
-
-    train_params =\
-        {
-            'learning_rate': 1e-2,
-            'epochs_before_decay': 0.1,
-            'epochs_count': 2e4,
-            'learning_rate_decay': 1/3
-        }
-
-    return general_params, train_params
-
-
-def generate_sd_output(vensim_model_file):
-    model = pysd.read_vensim(vensim_model_file)
-    data = model.run()
-    return data
+def generate_train_data(fields, data):
+    data = data[['patient_id', 'epizod_id'] + fields]
+    grouped = data.groupby(['patient_id', 'epizod_id'])[fields]
+    # dataset = data[fields].as_matrix()
+    # dataset = dataset/abs(dataset).max()
+    # dataset = preprocessing.normalize(dataset)
+    # dataset = preprocessing.scale(dataset)
+    return grouped, np_preproc_for_rnn3d(grouped)
 
 
 def get_sd_components(data):
@@ -53,16 +32,6 @@ def get_sd_components(data):
     fields = [key for key in fields if key not in general_stopwords]
     fields = [key for key in fields if key not in stopwords]
     return fields
-
-
-def generate_train_data(fields, data):
-    dataset = data[fields].as_matrix()
-    print(dataset[-1])
-    max_value = abs(dataset).max()
-    dataset = dataset/max_value + 2
-    # dataset = preprocessing.normalize(dataset)
-    # dataset = preprocessing.scale(dataset)
-    return dataset, np_preproc_for_rnn2d(dataset), max_value
 
 
 def get_weights(rnn_model, rnn_model_file, FDRNN_converter):
@@ -89,7 +58,11 @@ def calculate_error(required_columns_data, output):
 def main(args):
     model_name = args.model_name
     need_train = bool(args.need_retrain)
-    mode = KNOWN_MODEL
+    mode = UNKNOWN_MODEL
+
+    dataset_file_name = args.dataset_file_name
+    dataset_dir = path_join(DATA_DIR, model_name)
+    dataset_path = path_join(dataset_dir, dataset_file_name)
 
     experiment_name = args.experiment_name
     experiment_dir = path_join(EXPERIMENTS_DIR, experiment_name)
@@ -104,7 +77,6 @@ def main(args):
     log_path = path_join(experiment_dir, 'log.log')
     logging.basicConfig(filename=log_path, level=logging.INFO)
 
-    vensim_model_file = path_join(VENSIM_MODELS_DIR, '{}.mdl'.format(model_name))
     rnn_model_file = path_join(tf_model_dir, '{}_case{}.ckpt'.format(model_name, mode))
 
     general_params = \
@@ -125,25 +97,24 @@ def main(args):
     # data = generate_sd_output(vensim_model_file)
     # fields = get_sd_components(data)
 
-    ### === Vensim model to FD === ###
-    # if mode == UNKNOWN_MODEL:
-    #     FD = get_fd(fields, mode=mode)
-    #     FD.dT = general_params['dt']
-    # else:
-    FD = get_fd(vensim_model_file, mode=mode)
-    data = generate_sd_output(vensim_model_file)
+    data = pd.read_csv(dataset_path, delimiter='\t')
+    columns = data.columns
+    dt = data['timedelta'].values[1] - data['timedelta'].values[0]
+    stopwords = ['patient_id', 'epizod_id', 'start_date', 'end_date', 'data', 'activ', 'result']
+    fields = [column for column in data.columns if column not in stopwords]
 
-    print('need_train: {}'.format(need_train))
-    print('data.shape: {}'.format(data.shape))
+    FD = get_fd(fields, mode=mode)
+    FD.dT = dt
+
+    print('dt: {}'.format(dt))
     fields = [level for level in FD.names_units_map.keys()]
 
-    simulation_data, (X, Y), max_value = generate_train_data(fields, data)
-
-    delimiter = int(0.5 * X.shape[0])
-    train_X = X.copy() #[:delimiter]
-    train_Y = Y.copy() #[:delimiter]
-    test_X = X[delimiter:]
-    test_Y = Y[delimiter:]
+    grouped, (train_X, train_Y) = generate_train_data(fields, data)
+    for group in grouped:
+        simulation_data = group[1].values[1:][:, 2:]
+        break
+    train_X = train_X[:, 2:]
+    train_Y = train_Y[:, 2:]
 
     logging.info('###=== Fields ===###')
     logging.info(fields)
@@ -151,7 +122,7 @@ def main(args):
 
     ### === FD model to RNN === ###
     FDRNN_converter = FDRNNConverter(general_params['phi_h'], general_params['phi_o'])
-    rnn_model = FDRNN_converter.fd_to_rnn(FD, NNModelLog)
+    rnn_model = FDRNN_converter.fd_to_rnn(FD)
     levels = FD.levels
 
     levels_file = path_join(experiment_dir, 'levels')
@@ -161,7 +132,6 @@ def main(args):
     logging.info('###=== Levels ===###')
     logging.info(levels)
 
-    rnn_model.calculate_trainable_parameters()
     if need_train:
         rnn_model.train_batches(train_X, train_Y, train_params=train_params, model_file=rnn_model_file)
 
@@ -174,27 +144,37 @@ def main(args):
     logging.info('###=== Weights ===###')
     logging.info(weight)
 
-    initial_value = np.reshape(test_X[0], [1, test_X.shape[1]])
+    initial_value = np.reshape(train_X[0], [1, train_X.shape[1]])
 
     iterations_count = args.iterations_count
     if iterations_count == 0:
-        iterations_count = test_X.shape[0] - 1
+        iterations_count = simulation_data.shape[0]-1
 
-    test_Y = test_Y[:iterations_count + 1]
-    simulation_data = test_Y.copy()
-    # simulation_data = np.concatenate((initial_value, simulation_data), axis=0)
-
+    simulation_data = simulation_data[:iterations_count + 1]
     prn_output = run_simulation(rnn_model, rnn_model_file, initial_value, iterations_count)
 
-    logging.info('###=== Simulation output ===###')
+    simulation_data_file = path_join(experiment_dir, 'simulation_data')
+    with open(simulation_data_file, 'wb') as f:
+        pickle.dump(simulation_data, f)
+
+    prn_output_file = path_join(experiment_dir, 'prn_output')
+    with open(prn_output_file, 'wb') as f:
+        pickle.dump(prn_output, f)
+
+    logging.info('###=== Stimulation output ===###')
     logging.info(prn_output)
     logging.info(initial_value)
 
-    test_Y = (test_Y - 2) * max_value
-    prn_output = (prn_output - 2) * max_value
-    simulation_data = (simulation_data - 2) * max_value
+    error = calculate_error(simulation_data, prn_output)
 
-    error = calculate_error(test_Y, prn_output)
+    predictor = BaseNN(train_X.shape[1], train_X.shape[1])
+
+    predictor.train(train_X, train_Y)
+    nn_output = predictor.test(train_X)
+
+    nn_output_file = path_join(experiment_dir, 'nn_output')
+    with open(nn_output_file, 'wb') as f:
+        pickle.dump(nn_output, f)
 
     logging.info('###=== Simulation table ===###')
     logging.info(prn_output)
@@ -204,25 +184,27 @@ def main(args):
     for level in levels:
         i = fields.index(level)
         level_output = prn_output[:, i]
-        print(level_output.shape)
-        # level_nn_output = nn_output[:, i]
+        level_nn_output = nn_output[:, i]
         level_y = simulation_data[:, i]
-        print(level_y.shape)
-
-        graphs = (level_output, level_y)
-        labels = ('prn_y', 'true_y')
 
         biplot_name = 'biplot {} sd and prn simulation'.format(level)
         graph_name = 'graph {} sd and prn graphs'.format(level)
 
         biplot(level_output, level_y, biplot_name, images_dir)
-        plot_graphs(graphs, labels, '{} ({})'.format(model_name, level), images_dir)
+        plot_graphs(level_output, level_y, graph_name, images_dir)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+
     parser.add_argument(
         "--model_name",
+        type=str,
+        help="",
+    )
+
+    parser.add_argument(
+        "--dataset_file_name",
         type=str,
         help="",
     )
@@ -263,7 +245,7 @@ if __name__ == '__main__':
     parser.add_argument(
         "--epochs_count",
         type=float,
-        default=5e3,
+        default=2e1,
         help="",
     )
 

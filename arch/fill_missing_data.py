@@ -229,18 +229,16 @@ def get_target_columns(continuous, categorial):
 
     return {'continuous': continuous, 'categorial': categorial}
 
+
 def fill_by_groups(data_frame, continuous, categorial):
-
-    condition = ['condition']
-    result_frame = data_frame.dropna(subset=condition)
-
-    result_frame = fill(result_frame, ['patient_id', 'epizod_id'], get_target_columns(None, condition))
-
+    # condition = ['condition']
+    # result_frame = data_frame.dropna(subset=condition)
+    #
+    # result_frame = fill(result_frame, ['patient_id', 'epizod_id'], get_target_columns(None, condition))
 
     input_columns = ['age', 'sex', 'sd', 'timedelta', 'condition']
-    result_frame = result_frame.dropna(subset=input_columns)
+    result_frame = data_frame.dropna(subset=input_columns)
     # result_frame = result_frame.dropna(subset=target_columns, how='all')
-
 
     age_bins = [24, 50, 60, 70, 80, 101]
     age_bins_df = pd.cut(result_frame['age'], age_bins)

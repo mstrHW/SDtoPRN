@@ -2,11 +2,10 @@ import numpy as np
 import tensorflow as tf
 from module.nn_model import NNModel
 from module.fd_model.fd_model import FD
+import logging
 # from arch.NewRNN import NewRNN
 
 my_float = np.float64
-
-
 
 
 class FDRNNConverter(object):
@@ -15,7 +14,7 @@ class FDRNNConverter(object):
         self.phi_h = hidden_activation
         self.phi_o = output_activation
 
-    def fd_to_rnn(self, flow_diagram: FD):
+    def fd_to_rnn(self, flow_diagram: FD, nn_model):
 
         self.flow_diagram = flow_diagram
 
@@ -47,7 +46,7 @@ class FDRNNConverter(object):
         b_ah = np.zeros(shape=b_ah_shape, dtype=my_float)
 
         W_hr_shape = [hidden_count,  rates_count]
-        W_hr = np.zeros(shape= W_hr_shape, dtype=my_float)
+        W_hr = np.zeros(shape=W_hr_shape, dtype=my_float)
 
         W_ry_shape = [rates_count, units_count]
         W_ry = np.zeros(shape=W_ry_shape, dtype=my_float)
@@ -94,7 +93,7 @@ class FDRNNConverter(object):
             # 'W_ay': tf_W_ay,
         }
 
-        model = NNModel(parameters)
+        model = nn_model(parameters)
         # model = NewRNN(parameters)
 
         return model
@@ -132,6 +131,8 @@ class FDRNNConverter(object):
         pass
 
     def print_w(self, W):
+        edges_list = []
+
         for i in range(W.shape[0]):
             for j in range(W.shape[1]):
                 for key, value in self.flow_diagram.names_units_map.items():
@@ -142,4 +143,7 @@ class FDRNNConverter(object):
                     if value == j:
                         rate = key
 
-                print('{} -> {} : {}'.format(infsource, rate, W[i][j]))
+                edges_list.append((infsource, rate, W[i][j]))
+                logging.info('{} -> {} : {}'.format(infsource, rate, W[i][j]))
+
+        return edges_list

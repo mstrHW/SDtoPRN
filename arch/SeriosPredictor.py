@@ -1,4 +1,5 @@
-import tensorflow as tf
+from definitions import tf
+
 
 class SeriesPredictor(object):
 
@@ -58,7 +59,9 @@ class SeriesPredictor(object):
             tf.get_variable_scope().reuse_variables()
             self.saver.restore(sess, '../models/model.ckpt')
             output = sess.run(self.model(), feed_dict={self.x: test_x})
-            print(output)
+
+        return output
+
 
 if __name__ == '__main__':
     predictor = SeriesPredictor(input_dim=1, seq_size=4, hidden_dim=10)

@@ -11,8 +11,8 @@ def __clean_files() -> None:
     files = FILE_NAMES
     output_dir = CLEARED_DIR
 
-    cf.labresult_file_processing.main(path_join(input_dir, files[0]), path_join(output_dir, 'labresult.csv'))
-    cf.holesterin_file_processing.main(path_join(input_dir, files[1]), path_join(output_dir, 'holesterin.csv'))
+    # cf.labresult_file_processing.main(path_join(input_dir, files[0]), path_join(output_dir, 'labresult.csv'))
+    # cf.holesterin_file_processing.main(path_join(input_dir, files[1]), path_join(output_dir, 'holesterin.csv'))
     cf.predst_file_processing.main(path_join(input_dir, files[2]), path_join(output_dir, 'predst.csv'))
     cf.events_file_processing.main(path_join(input_dir, files[3]), path_join(output_dir, 'events.csv'))
     cf.eho_file_processing.main(path_join(input_dir, files[4]), path_join(output_dir, 'eho.csv'))
@@ -64,15 +64,15 @@ def __create_dataset(using_columns: List[str], period: int = 12, method: str = '
 
 
 if __name__ == '__main__':
-    _demo = False
-
-    _period = 12
-    _method = 'time'
-    _need_scale = False
-
-    __clean_files()
-    merge_files.main()
-
+    # _demo = False
+    #
+    # _period = 12
+    # _method = 'time'
+    # _need_scale = False
+    #
+    # __clean_files()
+    # merge_files.main()
+    #
     continuous_columns = [
         'Troponin',
         'RBC',

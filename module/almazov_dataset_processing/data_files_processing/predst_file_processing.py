@@ -42,10 +42,10 @@ def __prepare_predst_conditions(data_frame: pd.DataFrame) -> pd.DataFrame:
     if np.nan in uniq:
         uniq.remove(np.nan)
 
-    thefile = open('uniq_conditions.txt', 'w')
-    for item in uniq:
-        thefile.write("%s\n" % item)
-    thefile.close()
+    # thefile = open('uniq_conditions.txt', 'w')
+    # for item in uniq:
+    #     thefile.write("%s\n" % item)
+    # thefile.close()
 
     condition_map = dict()
     for i, value in enumerate(uniq):
