@@ -67,7 +67,8 @@ def plot_graphs(graphs, labels, model_name, images_dir):
     # min_ylim = min(y2) # for big values bug
     # max_ylim = max(y2)
     # plt.ylim(min_ylim, max_ylim)
-
+    plt.xlabel('Time')
+    plt.ylabel('{} value'.format(model_name))
     plt.grid()
     plt.legend()
     title = '{} modeling with different models'.format(model_name)
@@ -94,7 +95,7 @@ def plot_distribution(x, title,images_dir):
     # plt.show()
 
 
-def biplot(x, y, title, images_dir):
+def biplot(x, y, title, model_name, images_dir):
     plt.figure(figsize=(8, 8))
     plt.scatter(x, y)
     plt.grid()
@@ -105,7 +106,7 @@ def biplot(x, y, title, images_dir):
     plt.ylim(min_ylim, max_ylim)
 
     plt.xlabel('true value')
-    plt.ylabel('nn value')
+    plt.ylabel('{} value'.format(model_name))
     plt.title(title)
 
     # plt.show()

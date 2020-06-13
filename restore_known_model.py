@@ -9,7 +9,7 @@ import logging
 import argparse
 from sklearn import preprocessing
 import pickle
-
+from arch.base_nn import BaseNN
 from module.nn_model import NNModel
 from module.nn_model_log import NNModelLog
 
@@ -57,12 +57,12 @@ def get_sd_components(data):
 
 def generate_train_data(fields, data):
     dataset = data[fields].as_matrix()
-    print(dataset[-1])
-    max_value = abs(dataset).max()
-    dataset = dataset/max_value + 2
+    # print(dataset[-1])
+    # max_value = abs(dataset).max()
+    # dataset = dataset/max_value + 2
     # dataset = preprocessing.normalize(dataset)
     # dataset = preprocessing.scale(dataset)
-    return dataset, np_preproc_for_rnn2d(dataset), max_value
+    return dataset, np_preproc_for_rnn2d(dataset)#, max_value
 
 
 def get_weights(rnn_model, rnn_model_file, FDRNN_converter):
@@ -107,6 +107,10 @@ def main(args):
     vensim_model_file = path_join(VENSIM_MODELS_DIR, '{}.mdl'.format(model_name))
     rnn_model_file = path_join(tf_model_dir, '{}_case{}.ckpt'.format(model_name, mode))
 
+    nn_model_dir = path_join(tf_model_dir, 'nn_model')
+    make_directory(nn_model_dir)
+    nn_model_file = path_join(nn_model_dir, 'my_checkpoint')
+
     general_params = \
         {
             'phi_h': lambda x: x,
@@ -137,9 +141,9 @@ def main(args):
     print('data.shape: {}'.format(data.shape))
     fields = [level for level in FD.names_units_map.keys()]
 
-    simulation_data, (X, Y), max_value = generate_train_data(fields, data)
+    simulation_data, (X, Y) = generate_train_data(fields, data)
 
-    delimiter = int(0.5 * X.shape[0])
+    delimiter = int(0.7 * X.shape[0])
     train_X = X.copy() #[:delimiter]
     train_Y = Y.copy() #[:delimiter]
     test_X = X[delimiter:]
@@ -151,7 +155,7 @@ def main(args):
 
     ### === FD model to RNN === ###
     FDRNN_converter = FDRNNConverter(general_params['phi_h'], general_params['phi_o'])
-    rnn_model = FDRNN_converter.fd_to_rnn(FD, NNModelLog)
+    rnn_model = FDRNN_converter.fd_to_rnn(FD, NNModel)
     levels = FD.levels
 
     levels_file = path_join(experiment_dir, 'levels')
@@ -180,7 +184,7 @@ def main(args):
     if iterations_count == 0:
         iterations_count = test_X.shape[0] - 1
 
-    test_Y = test_Y[:iterations_count + 1]
+    test_X = test_X[:iterations_count + 1]
     simulation_data = test_Y.copy()
     # simulation_data = np.concatenate((initial_value, simulation_data), axis=0)
 
@@ -190,32 +194,49 @@ def main(args):
     logging.info(prn_output)
     logging.info(initial_value)
 
-    test_Y = (test_Y - 2) * max_value
-    prn_output = (prn_output - 2) * max_value
-    simulation_data = (simulation_data - 2) * max_value
+    predictor = BaseNN(train_X.shape[1], train_X.shape[1])
+    predictor.calculate_trainable_parameters()
 
-    error = calculate_error(test_Y, prn_output)
+    if need_train:
+        predictor.train(train_X, train_Y, train_params, nn_model_file)
+    nn_output = predictor.test(test_X, nn_model_file)
 
-    logging.info('###=== Simulation table ===###')
-    logging.info(prn_output)
-    logging.info('###=== Error ===###')
-    logging.info(error)
+    nn_output_file = path_join(experiment_dir, 'nn_output')
+    with open(nn_output_file, 'wb') as f:
+        pickle.dump(nn_output, f)
+
+    logging.info('###=== Train set error ===###')
+    initial_value = np.reshape(train_X[0], [1, train_X.shape[1]])
+    iterations_count = train_X.shape[0]-1
+    train_prn_output = run_simulation(rnn_model, rnn_model_file, initial_value, iterations_count)
+    train_prn_error = calculate_error(train_Y, train_prn_output)
+    logging.info(train_prn_error)
+
+    train_nn_output = predictor.test(train_X, nn_model_file)
+    train_nn_error = calculate_error(train_Y, train_nn_output)
+    logging.info(train_nn_error)
+
+    logging.info('###=== Test set error ===###')
+    prn_error = calculate_error(test_Y, prn_output)
+    logging.info(prn_error)
+    nn_error = calculate_error(test_Y, nn_output)
+    logging.info(nn_error)
 
     for level in levels:
         i = fields.index(level)
         level_output = prn_output[:, i]
-        print(level_output.shape)
-        # level_nn_output = nn_output[:, i]
+        level_nn_output = nn_output[:, i]
         level_y = simulation_data[:, i]
-        print(level_y.shape)
 
-        graphs = (level_output, level_y)
-        labels = ('prn_y', 'true_y')
+        graphs = (level_output, level_nn_output, level_y)
+        labels = ('PRN_y', 'NN_y', 'true_y')
 
-        biplot_name = 'biplot {} sd and prn simulation'.format(level)
-        graph_name = 'graph {} sd and prn graphs'.format(level)
+        biplot_name1 = 'biplot {} NN and SD simulation'.format(level)
+        biplot_name2 = 'biplot {} PRN and SD simulation'.format(level)
+        graph_name = 'graph {} SD and PRN graphs'.format(level)
 
-        biplot(level_output, level_y, biplot_name, images_dir)
+        biplot(level_nn_output, level_y, biplot_name1, 'NN', images_dir)
+        biplot(level_output, level_y, biplot_name2, 'PRN', images_dir)
         plot_graphs(graphs, labels, '{} ({})'.format(model_name, level), images_dir)
 
 

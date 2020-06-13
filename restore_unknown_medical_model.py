@@ -13,6 +13,8 @@ import pickle
 
 from definitions import path_join, make_directory, VENSIM_MODELS_DIR, EXPERIMENTS_DIR, DATA_DIR
 from arch.base_nn import BaseNN
+from module.nn_model import NNModel
+from module.nn_model_log import NNModelLog
 
 
 def generate_train_data(fields, data):
@@ -77,7 +79,10 @@ def main(args):
     log_path = path_join(experiment_dir, 'log.log')
     logging.basicConfig(filename=log_path, level=logging.INFO)
 
-    rnn_model_file = path_join(tf_model_dir, '{}_case{}.ckpt'.format(model_name, mode))
+    prn_model_file = path_join(tf_model_dir, '{}_case{}.ckpt'.format(model_name, mode))
+    nn_model_dir = path_join(tf_model_dir, 'nn_model')
+    make_directory(nn_model_dir)
+    nn_model_file = path_join(nn_model_dir, 'my_checkpoint')
 
     general_params = \
         {
@@ -109,12 +114,16 @@ def main(args):
     print('dt: {}'.format(dt))
     fields = [level for level in FD.names_units_map.keys()]
 
-    grouped, (train_X, train_Y) = generate_train_data(fields, data)
+    grouped, (X, Y) = generate_train_data(fields, data)
     for group in grouped:
         simulation_data = group[1].values[1:][:, 2:]
         break
-    train_X = train_X[:, 2:]
-    train_Y = train_Y[:, 2:]
+
+    delimiter = int(0.7 * X.shape[0])
+    train_X = X[:delimiter, 2:]
+    train_Y = Y[:delimiter, 2:]
+    test_X = X[delimiter:, 2:]
+    test_Y = Y[delimiter:, 2:]
 
     logging.info('###=== Fields ===###')
     logging.info(fields)
@@ -122,7 +131,7 @@ def main(args):
 
     ### === FD model to RNN === ###
     FDRNN_converter = FDRNNConverter(general_params['phi_h'], general_params['phi_o'])
-    rnn_model = FDRNN_converter.fd_to_rnn(FD)
+    rnn_model = FDRNN_converter.fd_to_rnn(FD, NNModel)
     levels = FD.levels
 
     levels_file = path_join(experiment_dir, 'levels')
@@ -133,9 +142,9 @@ def main(args):
     logging.info(levels)
 
     if need_train:
-        rnn_model.train_batches(train_X, train_Y, train_params=train_params, model_file=rnn_model_file)
+        rnn_model.train_batches(train_X, train_Y, train_params=train_params, model_file=prn_model_file)
 
-    weight, edges_list = get_weights(rnn_model, rnn_model_file, FDRNN_converter)
+    weight, edges_list = get_weights(rnn_model, prn_model_file, FDRNN_converter)
     edges_file = path_join(experiment_dir, 'edges')
 
     with open(edges_file, 'wb') as f:
@@ -151,7 +160,7 @@ def main(args):
         iterations_count = simulation_data.shape[0]-1
 
     simulation_data = simulation_data[:iterations_count + 1]
-    prn_output = run_simulation(rnn_model, rnn_model_file, initial_value, iterations_count)
+    prn_output = run_simulation(rnn_model, prn_model_file, initial_value, iterations_count)
 
     simulation_data_file = path_join(experiment_dir, 'simulation_data')
     with open(simulation_data_file, 'wb') as f:
@@ -165,21 +174,33 @@ def main(args):
     logging.info(prn_output)
     logging.info(initial_value)
 
-    error = calculate_error(simulation_data, prn_output)
-
     predictor = BaseNN(train_X.shape[1], train_X.shape[1])
+    predictor.calculate_trainable_parameters()
 
-    predictor.train(train_X, train_Y)
-    nn_output = predictor.test(train_X)
+    if need_train:
+        predictor.train(train_X, train_Y, train_params, nn_model_file)
+    nn_output = predictor.test(test_X, nn_model_file)
 
     nn_output_file = path_join(experiment_dir, 'nn_output')
     with open(nn_output_file, 'wb') as f:
         pickle.dump(nn_output, f)
 
-    logging.info('###=== Simulation table ===###')
-    logging.info(prn_output)
-    logging.info('###=== Error ===###')
-    logging.info(error)
+    logging.info('###=== Train set error ===###')
+    initial_value = np.reshape(train_X[0], [1, train_X.shape[1]])
+    iterations_count = train_X.shape[0]-1
+    train_prn_output = run_simulation(rnn_model, prn_model_file, initial_value, iterations_count)
+    train_prn_error = calculate_error(train_Y, train_prn_output)
+    logging.info(train_prn_error)
+
+    train_nn_output = predictor.test(train_X, nn_model_file)
+    train_nn_error = calculate_error(train_Y, train_nn_output)
+    logging.info(train_nn_error)
+
+    logging.info('###=== Test set error ===###')
+    prn_error = calculate_error(test_Y, prn_output)
+    logging.info(prn_error)
+    nn_error = calculate_error(test_Y, nn_output)
+    logging.info(nn_error)
 
     for level in levels:
         i = fields.index(level)
@@ -187,11 +208,16 @@ def main(args):
         level_nn_output = nn_output[:, i]
         level_y = simulation_data[:, i]
 
-        biplot_name = 'biplot {} sd and prn simulation'.format(level)
-        graph_name = 'graph {} sd and prn graphs'.format(level)
+        graphs = (level_output, level_nn_output, level_y)
+        labels = ('PRN_y', 'NN_y', 'true_y')
 
-        biplot(level_output, level_y, biplot_name, images_dir)
-        plot_graphs(level_output, level_y, graph_name, images_dir)
+        biplot_name1 = 'biplot {} NN and SD simulation'.format(level)
+        biplot_name2 = 'biplot {} PRN and SD simulation'.format(level)
+        graph_name = 'graph {} SD and PRN graphs'.format(level)
+
+        biplot(level_nn_output, level_y, biplot_name1, 'NN', images_dir)
+        biplot(level_output, level_y, biplot_name2, 'PRN', images_dir)
+        plot_graphs(graphs, labels, '{} ({})'.format(model_name, level), images_dir)
 
 
 if __name__ == '__main__':

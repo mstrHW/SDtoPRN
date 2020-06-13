@@ -1,8 +1,8 @@
 import tensorflow as tf
 import numpy as np
 
-def stack_constants_and_variables():
 
+def stack_constants_and_variables():
     train_X = np.asarray([[3.3, 4.4], [5.5, 6.71], [6.93, 4.168], [9.779, 6.182], [7.59, 2.167]])
     train_Y = np.asarray([[1.7], [2.76], [2.09], [3.19], [1.694]])
     n_samples = train_X.shape[0]

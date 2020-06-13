@@ -11,7 +11,7 @@ def add_additional_columns(data_frame: pd.DataFrame) -> pd.DataFrame:
     result_frame = __add_duration_column(result_frame)
     result_frame = __add_additional_indicators(result_frame)
     result_frame['patient_id'] = result_frame['patient_id'].astype(int)
-    result_frame = result_frame.sort_values(by=['patient_id', 'epizod_id', 'timedelta'])
+    result_frame = result_frame.sort_values(by=['patient_id', 'epizod_id', 'event_timedelta'])
 
     assert(data_frame.shape[0] == result_frame.shape[0])
 
@@ -24,7 +24,7 @@ def __add_event_timedelta(data_frame: pd.DataFrame) -> pd.DataFrame:
     date_columns = ['start_date', 'event_date']
     timedelta_func = lambda x: (x[date_columns[1]] - x[date_columns[0]])
 
-    result_frame = __add_timedelta_column(data_frame, date_columns, timedelta_func, 'timedelta')
+    result_frame = __add_timedelta_column(data_frame, date_columns, timedelta_func, 'event_timedelta')
     return result_frame
 
 
@@ -51,27 +51,27 @@ def __add_intervention_timedelta(data_frame: pd.DataFrame) -> pd.DataFrame:
     date_columns = ['data', 'event_date']
     timedelta_func = lambda x: (x[date_columns[1]] - x[date_columns[0]])
 
-    result_frame = __add_timedelta_column(data_frame, date_columns, timedelta_func, 'event_timedelta')
+    result_frame = __add_timedelta_column(data_frame, date_columns, timedelta_func, 'intervention_timedelta')
     result_frame = __preprocess_negative_numbers(result_frame)
-    print(result_frame['event_timedelta'].describe())
+    print(result_frame['intervention_timedelta'].describe())
     return result_frame
 
 
 def __preprocess_negative_numbers(data_frame: pd.DataFrame) -> pd.DataFrame:
-    print('### === Start method : fill_event_timedelta === ###')
+    print('### === Start method : fill_intervention_timedelta === ###')
 
-    data_frame['event_timedelta'] = data_frame['event_timedelta'].astype(float)
+    data_frame['intervention_timedelta'] = data_frame['intervention_timedelta'].astype(float)
 
     _mask = data_frame['data'] == NULL_DATE
     data_frame['activ'][_mask] = 0
-    data_frame['event_timedelta'][_mask] = 0
+    data_frame['intervention_timedelta'][_mask] = 0
 
     _mask = data_frame['event_timedelta'] < 0
     data_frame['activ'][_mask] = 0
-    data_frame['event_timedelta'][_mask] = 0
+    data_frame['intervention_timedelta'][_mask] = 0
 
-    print('### === End method : fill_event_timedelta === ###')
-    print('after fill_event_timedelta : {}'.format(data_frame.shape))
+    print('### === End method : fill_intervention_timedelta === ###')
+    print('after fill_intervention_timedelta : {}'.format(data_frame.shape))
     return data_frame
 
 

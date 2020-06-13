@@ -151,10 +151,10 @@ def main(args):
 
     iterations_count = args.iterations_count
     if iterations_count == 0:
-        iterations_count = test_X.shape[0]-1
+        iterations_count = simulation_data.shape[0]-1
 
-    # test_Y = test_Y[:iterations_count + 1]
-    simulation_data = test_Y.copy()
+    simulation_data = simulation_data[:iterations_count + 1]
+    # simulation_data = test_Y.copy()
     # simulation_data = np.concatenate((initial_value, simulation_data), axis=0)
 
     prn_output = run_simulation(rnn_model, prn_model_file, initial_value, iterations_count)
@@ -171,8 +171,6 @@ def main(args):
     logging.info(prn_output)
     logging.info(initial_value)
 
-    error = calculate_error(test_Y, prn_output)
-
     predictor = BaseNN(train_X.shape[1], train_X.shape[1])
     predictor.calculate_trainable_parameters()
 
@@ -186,10 +184,23 @@ def main(args):
 
     logging.info('###=== Simulation table ===###')
     logging.info(prn_output)
-    logging.info('###=== Error ===###')
-    logging.info(error)
-    error2 = calculate_error(test_Y, nn_output)
-    logging.info(error2)
+
+    logging.info('###=== Train set error ===###')
+    initial_value = np.reshape(train_X[0], [1, train_X.shape[1]])
+    iterations_count = train_X.shape[0]-1
+    train_prn_output = run_simulation(rnn_model, prn_model_file, initial_value, iterations_count)
+    train_prn_error = calculate_error(train_Y, train_prn_output)
+    logging.info(train_prn_error)
+
+    train_nn_output = predictor.test(train_X, nn_model_file)
+    train_nn_error = calculate_error(train_Y, train_nn_output)
+    logging.info(train_nn_error)
+
+    logging.info('###=== Test set error ===###')
+    prn_error = calculate_error(test_Y, prn_output)
+    logging.info(prn_error)
+    nn_error = calculate_error(test_Y, nn_output)
+    logging.info(nn_error)
 
     for level in levels:
         i = fields.index(level)
@@ -198,14 +209,14 @@ def main(args):
         level_y = simulation_data[:, i]
 
         graphs = (level_output, level_nn_output, level_y)
-        labels = ('prn_y', 'nn_y', 'true_y')
+        labels = ('PRN_y', 'NN_y', 'true_y')
 
-        biplot_name1 = 'biplot {} nn and sd simulation'.format(level)
-        biplot_name2 = 'biplot {} prn and sd simulation'.format(level)
-        graph_name = 'graph {} sd and prn graphs'.format(level)
+        biplot_name1 = 'biplot {} NN and SD simulation'.format(level)
+        biplot_name2 = 'biplot {} PRN and SD simulation'.format(level)
+        graph_name = 'graph {} SD and PRN graphs'.format(level)
 
-        biplot(level_nn_output, level_y, biplot_name1, images_dir)
-        biplot(level_output, level_y, biplot_name2, images_dir)
+        biplot(level_nn_output, level_y, biplot_name1, 'NN', images_dir)
+        biplot(level_output, level_y, biplot_name2, 'PRN', images_dir)
         plot_graphs(graphs, labels, '{} ({})'.format(model_name, level), images_dir)
 
 

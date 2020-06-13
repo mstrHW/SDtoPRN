@@ -66,9 +66,9 @@ def __create_dataset(using_columns: List[str], period: int = 12, method: str = '
 if __name__ == '__main__':
     # _demo = False
     #
-    # _period = 12
-    # _method = 'time'
-    # _need_scale = False
+    _period = 12
+    _method = 'time'
+    _need_scale = False
     #
     # __clean_files()
     # merge_files.main()

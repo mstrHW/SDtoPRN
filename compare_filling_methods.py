@@ -73,7 +73,8 @@ def mean_imputation(train, test, predictor_columns, target_columns, experiment_p
     test_X = test[predictor_columns]
     test_y = test[target_columns]
 
-    for column in target_columns:
+    train_df = None
+    for i, column in enumerate(target_columns):
         train_target_column = train_y.loc[:, column]
         is_nan = pd.isna(train_target_column)
 
@@ -97,6 +98,7 @@ def mean_imputation(train, test, predictor_columns, target_columns, experiment_p
         df = pd.concat([train_df, test_df], axis=0)
 
         pred_df = fill_by_fill_values(df, column, None)
+        _pred_df = pred_df.copy()
         pred_df = pred_df.iloc[train_df.shape[0]:, :]
         pred_y = pred_df[column]
 
@@ -128,6 +130,16 @@ def mean_imputation(train, test, predictor_columns, target_columns, experiment_p
 
         with open(pred_y_file, 'wb') as file:
             pickle.dump(pred_y.values, file)
+
+        if i == 0:
+            new_y_df = _pred_df[column]
+        else:
+            new_y_df = pd.concat([new_y_df, _pred_df[column]], axis=1)
+
+    new_df = pd.concat([train_X, test_X], axis=0)
+    new_df = pd.concat([new_df, new_y_df], axis=1)
+
+    return new_df
 
 
 def get_fill_value(data_frame, groups, target_columns):
@@ -308,14 +320,20 @@ def main():
     from sklearn.model_selection import train_test_split
     train, test = train_test_split(data_frame, test_size=0.2, random_state=42)
 
-    lr_experiment_path = path_join(experiment_path, 'linear_regression')
+    # lr_experiment_path = path_join(experiment_path, 'linear_regression')
     # linean_regression(train, test, predictor_columns, filled_columns, lr_experiment_path)
-    print_filling_results(filled_columns, lr_experiment_path)
+    # print_filling_results(filled_columns, lr_experiment_path)
 
-    mi_experiment_path = path_join(experiment_path, 'mean_imputation')
+    # mi_experiment_path = path_join(experiment_path, 'mean_imputation')
     # mean_imputation(train, test, predictor_columns, filled_columns, mi_experiment_path)
-    print_filling_results(filled_columns, mi_experiment_path)
+    # print_filling_results(filled_columns, mi_experiment_path)
 
+    milr_experiment_path = path_join(experiment_path, 'mean_imputation_linear_regression')
+    new_df = mean_imputation(train, test, predictor_columns, filled_columns, milr_experiment_path)
+    print(new_df.columns)
+    train, test = train_test_split(new_df, test_size=0.2, random_state=42)
+    linean_regression(train, test, predictor_columns, filled_columns, milr_experiment_path)
+    print_filling_results(filled_columns, milr_experiment_path)
     # for column in data_frame.columns:
     #     lower, upper, _ = get_range(data_frame[column])
     #     print('{} : {}..{}'.format(column, lower, upper))

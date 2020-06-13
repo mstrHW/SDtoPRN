@@ -107,8 +107,8 @@ def __generate_fd_parameters(names: List[str]) -> Dict:
     components_with_expressions = {}
 
     for level in levels:
-        mode = ONLY_OUT
-        # mode = IN_AND_OUT
+        # mode = ONLY_OUT
+        mode = IN_AND_OUT
         name1 = 'in_' + level
         name2 = 'out_' + level
 
@@ -158,20 +158,40 @@ def __generate_components(names: List[str]) -> [List[str], List, List, float]:
     return levels, constants, rates, dt
 
 
-def get_fd(params, mode):
-    if mode == KNOWN_MODEL:
-        parameters = __get_fd_parameters(params)
-    elif mode == UNKNOWN_MODEL:
-        parameters = __generate_fd_parameters(params)
-    else:
-        print('unknown mode')
-        return []
+def create_known_model(vensim_file_name):
+    parameters = __get_fd_parameters(vensim_file_name)
     levels = parameters['levels']
     constants = parameters['constants']
     rates = parameters['rates']
     dt = parameters['dt']
     fd_model = FD(levels, constants, rates, dt)
     return fd_model
+
+
+def create_unknown_model(field_names):
+    parameters = __generate_fd_parameters(field_names)
+    levels = parameters['levels']
+    constants = parameters['constants']
+    rates = parameters['rates']
+    dt = parameters['dt']
+    fd_model = FD(levels, constants, rates, dt)
+    return fd_model
+
+
+# def get_fd(params, mode):
+#     if mode == KNOWN_MODEL:
+#         parameters = __get_fd_parameters(params)
+#     elif mode == UNKNOWN_MODEL:
+#         parameters = __generate_fd_parameters(params)
+#     else:
+#         print('unknown mode')
+#         return []
+#     levels = parameters['levels']
+#     constants = parameters['constants']
+#     rates = parameters['rates']
+#     dt = parameters['dt']
+#     fd_model = FD(levels, constants, rates, dt)
+#     return fd_model
 
 
 def demo():

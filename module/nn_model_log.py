@@ -297,13 +297,13 @@ class NNModelLog(object):
         outputs = np.array(outputs)
         return outputs
 
-    def calculate_trainable_parameters(self):
-        total_parameters = 0
-        for variable in tf.trainable_variables():
-            # shape is an array of tf.Dimension
-            shape = variable.get_shape()
-            variable_parameters = 1
-            for dim in shape:
-                variable_parameters *= dim.value
-            total_parameters += variable_parameters
-        logging.info('total_parameters: {}'.format(total_parameters))
+    # def calculate_trainable_parameters(self):
+    #     total_parameters = 0
+    #     for variable in tf.trainable_variables():
+    #         # shape is an array of tf.Dimension
+    #         shape = variable.get_shape()
+    #         variable_parameters = 1
+    #         for dim in shape:
+    #             variable_parameters *= dim.value
+    #         total_parameters += variable_parameters
+    #     logging.info('total_parameters: {}'.format(total_parameters))

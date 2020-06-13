@@ -47,6 +47,8 @@ class FD(object):
             self.name = name
             self.expression = FD.Expression()
             self.flow = FD.Flow()
+            self.names_units_map = None
+            self.names_hidden_map = None
 
         def __repr__(self):
             result = 'rate : {}\n'.format(self.name)

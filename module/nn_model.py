@@ -49,25 +49,25 @@ class NNModel(object):
         initial = tf.constant(0.1, shape=shape)
         return tf.Variable(initial, name=name)
 
-    def initialize_parameters(self, n_x, n_h=10, n_y=1):
-
-        parameters = {}
-
-        Wax = self.weight_variable(shape=[n_x, n_h], name='Wax')
-        ba = self.bias_variable(shape=[n_h], name='ba')
-
-        Wya = self.weight_variable(shape=[n_h, n_y], name='Wya')
-        by = self.bias_variable(shape=[n_y], name='by')
-
-        Waa = tf.constant(1, shape=[1], name='Waa', dtype=my_float)
-
-        parameters['Wax'] = Wax
-        parameters['ba'] = ba
-        parameters['Wya'] = Wya
-        parameters['by'] = by
-        parameters['Waa'] = Waa
-
-        return parameters
+    # def initialize_parameters(self, n_x, n_h=10, n_y=1):
+    #
+    #     parameters = {}
+    #
+    #     Wax = self.weight_variable(shape=[n_x, n_h], name='Wax')
+    #     ba = self.bias_variable(shape=[n_h], name='ba')
+    #
+    #     Wya = self.weight_variable(shape=[n_h, n_y], name='Wya')
+    #     by = self.bias_variable(shape=[n_y], name='by')
+    #
+    #     Waa = tf.constant(1, shape=[1], name='Waa', dtype=my_float)
+    #
+    #     parameters['Wax'] = Wax
+    #     parameters['ba'] = ba
+    #     parameters['Wya'] = Wya
+    #     parameters['by'] = by
+    #     parameters['Waa'] = Waa
+    #
+    #     return parameters
 
     def rnn_forward(self, x, parameters):
 
@@ -168,14 +168,6 @@ class NNModel(object):
                     mse += _mse
                     lr = _lr
 
-                    # print(mse)
-                    # print(_wah)
-                    # print(_whr)
-                    # count += 1
-                    # if count == 2:
-                    #     return
-
-                    # print('here')
                 mse /= batches_count
 
                 if i % max(int(epochs_count * 0.01), 1) == 0:
@@ -294,3 +286,5 @@ class NNModel(object):
                 variable_parameters *= dim.value
             total_parameters += variable_parameters
         logging.info('total_parameters: {}'.format(total_parameters))
+
+        return total_parameters

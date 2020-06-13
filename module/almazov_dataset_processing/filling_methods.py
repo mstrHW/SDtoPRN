@@ -19,6 +19,13 @@ class MeanImputationFilling(object):
         result_frame = data_frame
         if continuous:
             result_frame[continuous] = result_frame.groupby(groups)[continuous].transform(lambda x: x.fillna(round(x.mean(), 2)))
+            print(groups)
+            names = []
+            sizes = []
+            for i, (name, group) in enumerate(result_frame.groupby(groups)):
+                names.append('group_{}'.format(i))
+                sizes.append(len(group))
+            print(names, sizes)
         if categorical:
             result_frame[categorical] = result_frame.groupby(groups)[categorical].transform(lambda x: x.fillna(x.median()))
 
@@ -93,6 +100,7 @@ def fill_by_groups(data_frame: pd.DataFrame, continuous: List[str], categorical:
 
     groups = __get_groups(result_frame)
     for group in groups:
+        # print(group)
         result_frame, nans_summ = filling_method.fill(result_frame, group, get_target_columns(continuous, categorical))
         if not (nans_summ > 0):
             break

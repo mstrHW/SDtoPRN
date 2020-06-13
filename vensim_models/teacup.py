@@ -1,6 +1,6 @@
 """
 Python model "teacup.py"
-Translated using PySD version 0.10.0
+Translated using PySD version 0.8.3
 """
 from __future__ import division
 import numpy as np
@@ -25,30 +25,19 @@ _namespace = {
     'TIME STEP': 'time_step'
 }
 
-__pysd_version__ = "0.10.0"
-
-__data = {'scope': None, 'time': lambda: 0}
-
-
-def _init_outer_references(data):
-    for key in data:
-        __data[key] = data[key]
-
-
-def time():
-    return __data['time']()
+__pysd_version__ = "0.8.3"
 
 
 @cache('run')
 def characteristic_time():
     """
-    Real Name: b'Characteristic Time'
-    Original Eqn: b'10'
-    Units: b'Minutes'
-    Limits: (0.0, None)
-    Type: constant
+    Characteristic Time
 
-    b'How long will it take the teacup to cool 1/e of the way to equilibrium?'
+    Minutes [0,?]
+
+    constant
+
+    How long will it take the teacup to cool 1/e of the way to equilibrium?
     """
     return 10
 
@@ -56,13 +45,14 @@ def characteristic_time():
 @cache('step')
 def heat_loss_to_room():
     """
-    Real Name: b'Heat Loss to Room'
-    Original Eqn: b'(Teacup Temperature - Room Temperature) / Characteristic Time'
-    Units: b'Degrees Fahrenheit/Minute'
-    Limits: (None, None)
-    Type: component
+    Heat Loss to Room
 
-    b'This is the rate at which heat flows from the cup into the room. We can \\n    \\t\\tignore it at this point.'
+    Degrees Fahrenheit/Minute
+
+    component
+
+    This is the rate at which heat flows from the cup into the room. We can 
+        ignore it at this point.
     """
     return (teacup_temperature() - room_temperature()) / characteristic_time()
 
@@ -70,13 +60,14 @@ def heat_loss_to_room():
 @cache('run')
 def room_temperature():
     """
-    Real Name: b'Room Temperature'
-    Original Eqn: b'70'
-    Units: b'Degrees Fahrenheit'
-    Limits: (-459.67, None)
-    Type: constant
+    Room Temperature
 
-    b'Put in a check to ensure the room temperature is not driven below absolute \\n    \\t\\tzero.'
+    Degrees Fahrenheit [-459.67,?]
+
+    constant
+
+    Put in a check to ensure the room temperature is not driven below absolute 
+        zero.
     """
     return 70
 
@@ -84,27 +75,30 @@ def room_temperature():
 @cache('step')
 def teacup_temperature():
     """
-    Real Name: b'Teacup Temperature'
-    Original Eqn: b'INTEG ( -Heat Loss to Room, 180)'
-    Units: b'Degrees Fahrenheit'
-    Limits: (32.0, 212.0)
-    Type: component
+    Teacup Temperature
 
-    b'The model is only valid for the liquid phase of tea. While the tea could \\n    \\t\\ttheoretically freeze or boil off, we would want an error to be thrown in \\n    \\t\\tthese cases so that the modeler can identify the issue and decide whether \\n    \\t\\tto expand the model.\\t\\tOf course, this refers to standard sea-level conditions...'
+    Degrees Fahrenheit [32,212]
+
+    component
+
+    The model is only valid for the liquid phase of tea. While the tea could 
+        theoretically freeze or boil off, we would want an error to be thrown in 
+        these cases so that the modeler can identify the issue and decide whether 
+        to expand the model.        Of course, this refers to standard sea-level conditions...
     """
-    return _integ_teacup_temperature()
+    return integ_teacup_temperature()
 
 
 @cache('run')
 def final_time():
     """
-    Real Name: b'FINAL TIME'
-    Original Eqn: b'30'
-    Units: b'Minute'
-    Limits: (None, None)
-    Type: constant
+    FINAL TIME
 
-    b'The final time for the simulation.'
+    Minute
+
+    constant
+
+    The final time for the simulation.
     """
     return 30
 
@@ -112,13 +106,13 @@ def final_time():
 @cache('run')
 def initial_time():
     """
-    Real Name: b'INITIAL TIME'
-    Original Eqn: b'0'
-    Units: b'Minute'
-    Limits: (None, None)
-    Type: constant
+    INITIAL TIME
 
-    b'The initial time for the simulation.'
+    Minute
+
+    constant
+
+    The initial time for the simulation.
     """
     return 0
 
@@ -126,13 +120,13 @@ def initial_time():
 @cache('step')
 def saveper():
     """
-    Real Name: b'SAVEPER'
-    Original Eqn: b'TIME STEP'
-    Units: b'Minute'
-    Limits: (0.0, None)
-    Type: component
+    SAVEPER
 
-    b'The frequency with which output is stored.'
+    Minute [0,?]
+
+    component
+
+    The frequency with which output is stored.
     """
     return time_step()
 
@@ -140,15 +134,15 @@ def saveper():
 @cache('run')
 def time_step():
     """
-    Real Name: b'TIME STEP'
-    Original Eqn: b'0.125'
-    Units: b'Minute'
-    Limits: (0.0, None)
-    Type: constant
+    TIME STEP
 
-    b'The time step for the simulation.'
+    Minute [0,?]
+
+    constant
+
+    The time step for the simulation.
     """
     return 0.125
 
 
-_integ_teacup_temperature = functions.Integ(lambda: -heat_loss_to_room(), lambda: 180)
+integ_teacup_temperature = functions.Integ(lambda: -heat_loss_to_room(), lambda: 180)

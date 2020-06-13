@@ -1,11 +1,11 @@
 import numpy as np
 import tensorflow as tf
-from module.nn_model import NNModel
+# from module.nn_model import NNModel
 from module.fd_model.fd_model import FD
 import logging
 # from arch.NewRNN import NewRNN
 
-my_float = np.float64
+my_float = np.float32
 
 
 class FDRNNConverter(object):
@@ -20,10 +20,10 @@ class FDRNNConverter(object):
 
         levels_count = len(flow_diagram.levels)
         constants_count = len(flow_diagram.constants)
-        # rates_count = len(FD.rates) * 100
+
         rates_count = len(flow_diagram.rates)
         units_count = levels_count + constants_count
-        # hidden_count = units_count * 30
+
         hidden_count = rates_count
 
         self.units_count = units_count
@@ -35,18 +35,8 @@ class FDRNNConverter(object):
         for i in range(W_xy_shape[0]):
             W_xy[i][i] = 1
 
-        # W_ay_shape = [units_count, units_count]
-        # W_ay = np.zeros(shape=W_ay_shape, dtype=my_float)
-        # for i in range(W_ay_shape[0]):
-        #     W_ay[i][i] = 1
-
-        W_ah_shape = [units_count, hidden_count]
+        W_ah_shape = [units_count, rates_count]
         W_ah = np.zeros(shape=W_ah_shape, dtype=my_float)
-        b_ah_shape = [hidden_count]
-        b_ah = np.zeros(shape=b_ah_shape, dtype=my_float)
-
-        W_hr_shape = [hidden_count,  rates_count]
-        W_hr = np.zeros(shape=W_hr_shape, dtype=my_float)
 
         W_ry_shape = [rates_count, units_count]
         W_ry = np.zeros(shape=W_ry_shape, dtype=my_float)
@@ -70,15 +60,9 @@ class FDRNNConverter(object):
             #     W[FD.names_units_map[inf_sourse], rate_index] = coef
 
         tf_W_xy = self.create_constant(W_xy, W_xy_shape, 'W_xy')
-        # tf_W_xy = self.create_variable(W_xy, W_xy_shape, 'W_xy')
-        # tf_W_ay = self.create_variable(W_ay, W_ay_shape, 'W_ay')
-
+        # tf_W_ah = tf.Variable(tf.random.truncated_normal((W_ah.shape[0], W_ah.shape[-1]), stddev=0.02), name='W_ah')
         tf_W_ah = self.create_variable(W_ah, W_ah_shape, 'W_ah')
-        tf_b_ah = self.create_variable(b_ah, b_ah_shape, 'b_ah')
-        # tf_W = self.weights_to_tensorflow(W, 'W') if case == 1 else self.create_variable(W, W_shape, 'W')
-        tf_W_hr = self.create_variable(W_hr, W_hr_shape, 'W_hr')
         tf_W_ry = self.create_constant(W_ry, W_ry_shape, 'W_ry')
-        # tf_W_ry = self.create_variable(W_ry, W_ry_shape, 'W_ry')
 
         parameters = {
             'hidden_count': hidden_count,
@@ -87,10 +71,7 @@ class FDRNNConverter(object):
             'phi_o': self.phi_o,
             'W_xy': tf_W_xy,
             'W_ah': tf_W_ah,
-            'b_ah': tf_b_ah,
-            'W_hr': tf_W_hr,
-            'W_ry': tf_W_ry
-            # 'W_ay': tf_W_ay,
+            'W_ry': tf_W_ry,
         }
 
         model = nn_model(parameters)
